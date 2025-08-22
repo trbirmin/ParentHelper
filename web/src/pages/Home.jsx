@@ -45,7 +45,7 @@ function ResultModal({ result, onClose, asText }) {
       window.removeEventListener('keydown', onKey)
       document.body.style.overflow = prev
     }
-  }, [])
+  }, [onClose])
 
   const stop = (e) => e.stopPropagation()
   return createPortal(
