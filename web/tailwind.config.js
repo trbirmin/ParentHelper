@@ -1,0 +1,37 @@
+/** @type {import('tailwindcss').Config} */
+export default {
+  content: [
+    './index.html',
+    './src/**/*.{js,jsx,ts,tsx}'
+  ],
+  theme: {
+    extend: {
+      colors: {
+        brand: {
+          50: '#f5fbff',
+          100: '#e6f6ff',
+          200: '#cdeaff',
+          300: '#a5d7ff',
+          400: '#78beff',
+          500: '#4ea6ff',
+          600: '#2e86e6',
+          700: '#2268b4',
+          800: '#1e548f',
+          900: '#1e4875'
+        },
+        mint: '#e8f5f2',
+        peach: '#ffe9df',
+        sand: '#f7f4ef'
+      },
+      borderRadius: {
+        xl: '1rem',
+        '2xl': '1.25rem'
+      },
+      fontSize: {
+        base: '1.05rem',
+        lg: '1.2rem'
+      }
+    }
+  },
+  plugins: []
+}

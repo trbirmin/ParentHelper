@@ -1,0 +1,13 @@
+{
+  "name": "parent-homework-helper",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Parent Homework Helper - Azure Static Web Apps (React + Tailwind) with Azure Functions API",
+  "scripts": {
+    "install:all": "npm --prefix web install && npm --prefix api install",
+    "start": "npm --prefix web run dev",
+  "start:api": "npm --prefix api run start",
+  "start:api:alt": "npm --prefix api run start -- --port 7072",
+    "build": "npm --prefix web run build"
+  }
+}
