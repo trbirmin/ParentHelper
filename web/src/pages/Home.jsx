@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react'
+import { createPortal } from 'react-dom'
 import UploadCard from '@/components/UploadCard'
 import CameraCard from '@/components/CameraCard'
 import QuestionCard from '@/components/QuestionCard'
@@ -36,13 +37,20 @@ function ResultModal({ result, onClose, asText }) {
     // Lock body scroll when modal is open
     const prev = document.body.style.overflow
     document.body.style.overflow = 'hidden'
-    return () => { document.body.style.overflow = prev }
+    const onKey = (e) => {
+      if (e.key === 'Escape') onClose?.()
+    }
+    window.addEventListener('keydown', onKey)
+    return () => {
+      window.removeEventListener('keydown', onKey)
+      document.body.style.overflow = prev
+    }
   }, [])
 
   const stop = (e) => e.stopPropagation()
-  return (
+  return createPortal(
     <div
-      className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-6"
+      className="fixed inset-0 z-[9999] bg-black/50 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-6"
       onClick={onClose}
       role="dialog"
       aria-modal="true"
@@ -121,6 +129,7 @@ function ResultModal({ result, onClose, asText }) {
           )}
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   )
 }
