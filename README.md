@@ -14,6 +14,9 @@ This repo is set up to deploy a Vite React frontend (`web/`) and an Azure Functi
 - `AZURE_OPENAI_API_VERSION` (e.g., `2024-06-01`)
 - `AZURE_DOCINTEL_ENDPOINT`
 - `AZURE_DOCINTEL_KEY`
+ - `AZURE_TRANSLATOR_KEY` (for translation)
+ - `AZURE_TRANSLATOR_REGION` (required if using multi-service Cognitive resource)
+ - `AZURE_TRANSLATOR_ENDPOINT` (optional; defaults to `https://api.cognitive.microsofttranslator.com`)
 
 ## How to deploy
 1. Create a Static Web App resource in Azure and connect this GitHub repo to it.

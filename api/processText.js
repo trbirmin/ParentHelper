@@ -3,6 +3,7 @@ import { solveFromText } from "./mathSolver.js";
 import { getDefinition } from "./fallbackDefinitions.js";
 import { generateAnswer, isAOAIConfigured } from "./aiAnswer.js";
 import { getTimeAnswer } from "./fallbackTime.js";
+import { translateText, isTranslatorConfigured } from "./translator.js";
 
 app.http('processText', {
   methods: ['POST'],
@@ -62,6 +63,27 @@ app.http('processText', {
     const items = splitQuestions(question)
 
     const buildItem = async (qLine) => {
+      // Simple target language detection: phrases like "in French", "in Spanish", or explicit code like "-> fr"
+      const langMap = {
+        french: 'fr', fr: 'fr',
+        spanish: 'es', es: 'es',
+        german: 'de', de: 'de',
+        italian: 'it', it: 'it',
+        portuguese: 'pt', pt: 'pt',
+        chinese: 'zh-Hans', 'zh': 'zh-Hans',
+        japanese: 'ja', ja: 'ja',
+        korean: 'ko', ko: 'ko',
+        arabic: 'ar', ar: 'ar'
+      }
+      let targetLang = null
+      const lower = qLine.toLowerCase()
+      const mArrow = lower.match(/->\s*([a-z-]{2,8})\b/)
+      if (mArrow && langMap[mArrow[1]]) targetLang = langMap[mArrow[1]]
+      if (!targetLang) {
+        const mIn = lower.match(/\b(?:in|to)\s+(french|spanish|german|italian|portuguese|chinese|japanese|korean|arabic|fr|es|de|it|pt|zh|ja|ko|ar)\b/)
+        if (mIn && langMap[mIn[1]]) targetLang = langMap[mIn[1]]
+      }
+
       let ai = null
       if (isAOAIConfigured()) {
         ai = await generateAnswer({
@@ -90,6 +112,22 @@ app.http('processText', {
             expl = t.explanation
           }
         }
+      }
+
+      // If a target language is present and Translator is configured, translate the final answer
+      if (targetLang && (ans || expl) && isTranslatorConfigured()) {
+        try {
+          const base = ans || expl || ''
+          const tx = await translateText({ text: base, to: targetLang })
+          if (tx.ok && tx.translated) {
+            // Keep original in explanation and put translation as the answer
+            if (ans) {
+              expl = expl ? `${expl}\n\n(${ans} in ${targetLang})` : `(${ans} in ${targetLang})`
+            }
+            ans = tx.translated
+            subj = subj || 'translation'
+          }
+        } catch {}
       }
       return { subject: subj, problem: qLine, answer: ans, explanation: expl }
     }

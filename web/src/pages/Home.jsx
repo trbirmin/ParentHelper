@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import UploadCard from '@/components/UploadCard'
 import CameraCard from '@/components/CameraCard'
 import QuestionCard from '@/components/QuestionCard'
@@ -25,12 +25,37 @@ export default function Home() {
       </section>
 
       {result && (
-        <section className="card p-5">
-          <div className="flex items-center justify-between mb-3">
-            <h3 className="font-semibold">Results</h3>
-            <button className="btn bg-slate-500 hover:bg-slate-600" onClick={clearAll}>Close</button>
-          </div>
+        <ResultModal result={result} onClose={clearAll} asText={asText} />
+      )}
+    </div>
+  )
+}
 
+function ResultModal({ result, onClose, asText }) {
+  useEffect(() => {
+    // Lock body scroll when modal is open
+    const prev = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+    return () => { document.body.style.overflow = prev }
+  }, [])
+
+  const stop = (e) => e.stopPropagation()
+  return (
+    <div
+      className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-6"
+      onClick={onClose}
+      role="dialog"
+      aria-modal="true"
+    >
+      <div
+        className="w-full sm:max-w-3xl bg-white rounded-t-2xl sm:rounded-2xl shadow-xl"
+        onClick={stop}
+      >
+        <div className="flex items-center justify-between p-4 border-b border-slate-200">
+          <h3 className="font-semibold">Results</h3>
+          <button className="btn bg-slate-500 hover:bg-slate-600" onClick={onClose}>Close</button>
+        </div>
+        <div className="max-h-[75vh] overflow-auto p-4">
           {result.error ? (
             <div className="text-sm text-red-700 bg-red-50 border border-red-200 rounded-xl p-3">{String(result.error)}</div>
           ) : Array.isArray(result?.items) ? (
@@ -94,8 +119,8 @@ export default function Home() {
               })()}
             </div>
           )}
-        </section>
-      )}
+        </div>
+      </div>
     </div>
   )
 }

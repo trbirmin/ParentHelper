@@ -4,6 +4,7 @@ import { solveFromText } from "./mathSolver.js";
 import { getDefinition } from "./fallbackDefinitions.js";
 import { getTimeAnswer } from "./fallbackTime.js";
 import { generateAnswer, isAOAIConfigured } from "./aiAnswer.js";
+import { translateText, isTranslatorConfigured } from "./translator.js";
 
 app.http('processImage', {
   methods: ['POST'],
@@ -83,6 +84,15 @@ app.http('processImage', {
       const picked = questions.length ? questions : [normalizeSpace(fullText).slice(0,300)]
 
       const buildItem = async (problemLine) => {
+        const lower = String(problemLine || '').toLowerCase()
+        const langMap = { french:'fr', fr:'fr', spanish:'es', es:'es', german:'de', de:'de', italian:'it', it:'it', portuguese:'pt', pt:'pt', chinese:'zh-Hans', zh:'zh-Hans', japanese:'ja', ja:'ja', korean:'ko', ko:'ko', arabic:'ar', ar:'ar' }
+        let targetLang = null
+        const mArrow = lower.match(/->\s*([a-z-]{2,8})\b/)
+        if (mArrow && langMap[mArrow[1]]) targetLang = langMap[mArrow[1]]
+        if (!targetLang) {
+          const mIn = lower.match(/\b(?:in|to)\s+(french|spanish|german|italian|portuguese|chinese|japanese|korean|arabic|fr|es|de|it|pt|zh|ja|ko|ar)\b/)
+          if (mIn && langMap[mIn[1]]) targetLang = langMap[mIn[1]]
+        }
         const findExpression = (s='') => {
           const text = String(s)
           const frac = text.match(/\b\d+\s*[⁄\/]\s*\d+\b/)
@@ -117,6 +127,19 @@ app.http('processImage', {
               expl = t.explanation
             }
           }
+        }
+        if (targetLang && (ans || expl) && isTranslatorConfigured()) {
+          try {
+            const base = ans || expl || ''
+            const tx = await translateText({ text: base, to: targetLang })
+            if (tx.ok && tx.translated) {
+              if (ans) {
+                expl = expl ? `${expl}\n\n(${ans} in ${targetLang})` : `(${ans} in ${targetLang})`
+              }
+              ans = tx.translated
+              subj = subj || 'translation'
+            }
+          } catch {}
         }
         return { subject: subj, problem: problemLine, answer: ans, explanation: expl }
       }
