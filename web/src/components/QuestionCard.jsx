@@ -1,5 +1,10 @@
 import React, { useEffect, useRef, useState } from 'react'
 
+// QuestionCard
+// - Textarea for typed questions with character limit
+// - Optional voice input using Web Speech API when supported
+// - Submits to `/api/processText` and displays results via parent callback
+
 const MAX = 500
 
 export default function QuestionCard({ onResult, onClear }) {
@@ -11,6 +16,7 @@ export default function QuestionCard({ onResult, onClear }) {
   const recognitionRef = useRef(null)
 
   useEffect(() => {
+    // Detect browser speech recognition support and cleanup on unmount
     const supported = typeof window !== 'undefined' && (
       'SpeechRecognition' in window || 'webkitSpeechRecognition' in window
     )
@@ -30,6 +36,7 @@ export default function QuestionCard({ onResult, onClear }) {
     if (!canSubmit) return
     setLoading(true)
     try {
+      // POST the typed question to the API as JSON
       const res = await fetch('/api/processText', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },

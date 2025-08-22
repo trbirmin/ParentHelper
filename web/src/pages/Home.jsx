@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { createPortal } from 'react-dom'
+// Home: entry page showing three input cards (Upload, Camera, Question)
+// Displays results in a modal rendered via a React portal to avoid stacking/overflow issues
 import UploadCard from '@/components/UploadCard'
 import CameraCard from '@/components/CameraCard'
 import QuestionCard from '@/components/QuestionCard'
@@ -59,11 +61,13 @@ function ResultModal({ result, onClose, asText }) {
         className="w-full sm:max-w-3xl bg-white rounded-t-2xl sm:rounded-2xl shadow-xl"
         onClick={stop}
       >
-        <div className="flex items-center justify-between p-4 border-b border-slate-200">
+  {/* Modal header with close action */}
+  <div className="flex items-center justify-between p-4 border-b border-slate-200">
           <h3 className="font-semibold">Results</h3>
           <button className="btn bg-slate-500 hover:bg-slate-600" onClick={onClose}>Close</button>
         </div>
-        <div className="max-h-[75vh] overflow-auto p-4">
+  {/* Scrollable content area */}
+  <div className="max-h-[75vh] overflow-auto p-4">
           {result.error ? (
             <div className="text-sm text-red-700 bg-red-50 border border-red-200 rounded-xl p-3">{String(result.error)}</div>
           ) : Array.isArray(result?.items) ? (

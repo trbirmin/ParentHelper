@@ -2,9 +2,11 @@ import React from 'react'
 import { Link, NavLink } from 'react-router-dom'
 
 export default function Navbar() {
+  // Utility to style active vs inactive route links
   const linkCls = ({ isActive }) =>
     `px-3 py-2 rounded-xl text-sm font-medium ${isActive ? 'bg-brand-100 text-brand-800' : 'text-slate-700 hover:bg-slate-100'}`
   return (
+    // Sticky-looking translucent header with blur and simple nav
     <header className="bg-white/80 backdrop-blur supports-[backdrop-filter]:bg-white/60 border-b border-slate-200">
       <div className="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between">
         <Link to="/" className="flex items-center gap-2">

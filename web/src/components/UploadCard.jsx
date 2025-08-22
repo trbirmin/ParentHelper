@@ -1,5 +1,11 @@
 import React, { useCallback, useRef, useState } from 'react'
 
+// UploadCard
+// - Lets users upload a worksheet or photo from disk (PDF/Word/images)
+// - Validates file type, supports drag-and-drop and click-to-browse
+// - Submits the file to the backend `/api/uploadFile` endpoint and shows results via parent callback
+
+// MIME types we accept from the browser (extension fallback used if missing/empty)
 const allowedMime = [
   'application/pdf',
   'application/msword',
@@ -7,17 +13,23 @@ const allowedMime = [
   'image/png', 'image/jpeg', 'image/jpg', 'image/gif'
 ]
 
+// 'accept' attribute advertised to the file picker
 const acceptAttr = [
   '.pdf', '.doc', '.docx', '.png', '.jpg', '.jpeg', '.gif'
 ].join(',')
 
 export default function UploadCard({ onResult, onClear }) {
+  // Selected file reference
   const [file, setFile] = useState(null)
+  // Whether a dragged file is over the drop zone (for styling)
   const [dragOver, setDragOver] = useState(false)
+  // Network submission state
   const [loading, setLoading] = useState(false)
+  // Ref to the hidden <input type="file"> for programmatic clicks
   const inputRef = useRef(null)
 
   const validate = (f) => {
+    // Ensure file exists and passes MIME or extension checks
     if (!f) return false
     if (allowedMime.includes(f.type)) return true
     // Some Word files may have empty type; fallback to extension check
@@ -27,6 +39,7 @@ export default function UploadCard({ onResult, onClear }) {
   }
 
   const onFiles = useCallback((files) => {
+    // Read the first file and validate; show a friendly alert on mismatch
     const f = files && files[0]
     if (!f) return
     if (!validate(f)) {
@@ -37,6 +50,7 @@ export default function UploadCard({ onResult, onClear }) {
   }, [])
 
   const onDrop = (e) => {
+    // Handle drop from desktop into the card
     e.preventDefault()
     setDragOver(false)
     if (e.dataTransfer?.files?.length) {
@@ -45,6 +59,7 @@ export default function UploadCard({ onResult, onClear }) {
   }
 
   const onBrowse = (e) => {
+    // File selected via the hidden input
     onFiles(e.target.files)
   }
 
@@ -53,6 +68,7 @@ export default function UploadCard({ onResult, onClear }) {
     if (!file) return
     setLoading(true)
     try {
+      // Send the file as multipart/form-data to the API
       const form = new FormData()
       form.append('file', file)
       const res = await fetch('/api/uploadFile', { method: 'POST', body: form })
@@ -69,6 +85,7 @@ export default function UploadCard({ onResult, onClear }) {
   }
 
   const clear = () => {
+    // Clear any selected file and notify parent to clear results
     setFile(null)
     if (inputRef.current) inputRef.current.value = ''
     onClear?.()
@@ -76,9 +93,11 @@ export default function UploadCard({ onResult, onClear }) {
 
   return (
     <div className="card p-5 flex flex-col gap-4">
+      {/* Title and help text */}
       <h2 className="font-semibold text-lg">Upload file</h2>
       <p className="text-slate-600">PDF, Word, or image. Drop a file here or browse to select.</p>
 
+      {/* Drag-and-drop area with click-to-browse fallback */}
       <div
         onDragOver={(e) => { e.preventDefault(); setDragOver(true) }}
         onDragLeave={() => setDragOver(false)}
@@ -98,6 +117,7 @@ export default function UploadCard({ onResult, onClear }) {
             </>
           )}
         </div>
+        {/* Hidden file input tied to the card for click-to-browse */}
         <input
           ref={inputRef}
           type="file"
@@ -107,6 +127,7 @@ export default function UploadCard({ onResult, onClear }) {
         />
       </div>
 
+      {/* Submit and clear actions */}
       <div className="flex gap-3">
         <button className="btn" onClick={onSubmit} disabled={!file || loading}>
           {loading ? 'Uploading…' : 'Submit'}

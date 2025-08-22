@@ -1,3 +1,6 @@
+// processImage: accepts a single image (camera/file), runs Document Intelligence
+// prebuilt-document OCR, extracts question-like prompts (favoring math),
+// and answers via Azure OpenAI or local fallbacks, optionally translating the output.
 import { app } from "@azure/functions";
 import { DocumentAnalysisClient, AzureKeyCredential } from "@azure/ai-form-recognizer";
 import { solveFromText } from "./mathSolver.js";

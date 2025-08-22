@@ -1,4 +1,8 @@
-/** @type {import('tailwindcss').Config} */
+/**
+ * Tailwind CSS configuration
+ * - content: files to scan for class names
+ * - theme.extend: custom brand palette, radii, and base font sizes
+ */
 export default {
   content: [
     './index.html',
@@ -33,5 +37,6 @@ export default {
       }
     }
   },
+  // Add Tailwind plugins here if needed (forms, typography, etc.)
   plugins: []
 }

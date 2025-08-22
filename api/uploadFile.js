@@ -1,3 +1,7 @@
+// uploadFile: accepts PDF/images (and limited JSON) and uses Azure Document Intelligence
+// to extract text. It then derives candidate questions/prompts using heuristics
+// (paragraphs, enumerations, math patterns, and layout-based stacked fractions),
+// and answers each via Azure OpenAI (if configured) or local fallbacks (math/definitions/time).
 import { app } from "@azure/functions";
 import { DocumentAnalysisClient, AzureKeyCredential } from "@azure/ai-form-recognizer";
 import { solveFromText } from "./mathSolver.js";
@@ -44,7 +48,7 @@ app.http('uploadFile', {
         return { status: 400, jsonBody: { error: 'Empty file' } }
       }
 
-      if (!endpoint || !key) {
+  if (!endpoint || !key) {
         return { status: 500, jsonBody: { error: 'Missing AZURE_DOCINTEL_ENDPOINT or AZURE_DOCINTEL_KEY' } }
       }
 
@@ -86,7 +90,8 @@ app.http('uploadFile', {
         // return { status: 415, jsonBody: { error: 'Unsupported file format', details: 'Use PDF or images (JPG/PNG/TIFF/BMP).' } }
       }
 
-      const buffer = Buffer.from(await file.arrayBuffer())
+  // Run Document Intelligence prebuilt-document to get text + structure
+  const buffer = Buffer.from(await file.arrayBuffer())
       const client = new DocumentAnalysisClient(endpoint, new AzureKeyCredential(key))
 
       // Use the prebuilt-document model to extract text and structure
@@ -106,7 +111,7 @@ app.http('uploadFile', {
         cells: t.cells?.map(c => ({ rowIndex: c.rowIndex, columnIndex: c.columnIndex, content: c.content }))
       }))
 
-      // Try to compute an answer from extracted content (basic arithmetic only)
+  // Quick math probe against the whole text (basic arithmetic only)
       const fullText = result.content || ''
       const solution = solveFromText(fullText)
 
@@ -121,7 +126,7 @@ app.http('uploadFile', {
         })
       }
 
-      // Helpers to extract multiple questions
+  // Heuristic helpers to extract multiple questions
       const normalizeSpace = (s='') => String(s).replace(/\s+/g, ' ').trim()
       const isIgnorableRole = (role) => ['pageNumber','pageHeader','pageFooter','footnote'].includes(role || '')
       const isQuestionLike = (s='') => {
@@ -155,7 +160,7 @@ app.http('uploadFile', {
         return qs.slice(0, 5)
       }
 
-      // Split enumerated blocks (1., 2., 3.) into separate questions when present
+  // Split enumerated blocks (1., 2., 3.) into separate questions when present
       const splitEnumeratedBlocks = (text) => {
         const rawLines = String(text).split(/\r?\n/)
         const isEnumLine = (l) => /^\s*(\(?\d{1,3}[).]|\d{1,3}\.)\s+/.test(l)
@@ -205,7 +210,7 @@ app.http('uploadFile', {
         return String(block).slice(0,300)
       }
 
-      // Build candidates from paragraphs first (best signal for wrapped questions)
+  // Build candidates from paragraphs first (best signal for wrapped questions)
       const paraCandidates = []
       for (const pg of paragraphs) {
         if (!pg || isIgnorableRole(pg.role)) continue
@@ -222,7 +227,7 @@ app.http('uploadFile', {
         }
       }
 
-      // Also consider enumerated blocks and line-based fallbacks, plus math-style lines
+  // Also consider enumerated blocks and line-based fallbacks, plus math-style lines
       const extractMathFromLines = (text) => {
         const raw = String(text)
         const lines = raw.split(/\r?\n/).map(l=>l.trim()).filter(Boolean)
@@ -269,7 +274,7 @@ app.http('uploadFile', {
       }
       // Merge: paragraphs -> enumerated -> line-based
       const lineFallback = extractQuestions(fullText)
-      // Extract layout lines to reconstruct stacked fractions (numerator over denominator)
+  // Extract layout lines to reconstruct stacked fractions (numerator over denominator)
       const fractionPairsFromLayout = (() => {
         const out = []
         const mathHead = /(simplify|find the product|find the sum|find the difference|find the quotient|solve|add parentheses|write two expressions|write in|compare|sum|difference|product|quotient)/i
@@ -321,7 +326,7 @@ app.http('uploadFile', {
 
       function yTol(h){ return Math.max(0.01*h, 2) }
 
-      const mathFromLines = extractMathFromLines(fullText)
+  const mathFromLines = extractMathFromLines(fullText)
       // If enumerated blocks exist, use only those to avoid splitting one numbered block into multiple items.
       const merged = enumeratedMode
         ? [...questions]
@@ -349,7 +354,8 @@ app.http('uploadFile', {
       const limit = Number.isFinite(maxItems) && maxItems > 0 ? Math.min(maxItems, 50) : 20
       questions = deduped.slice(0, limit)
 
-      const buildItem = async (problemLine) => {
+  // Build a single response item using AOAI (if available) or fallbacks
+  const buildItem = async (problemLine) => {
         const lower = String(problemLine || '').toLowerCase()
         const langMap = { french:'fr', fr:'fr', spanish:'es', es:'es', german:'de', de:'de', italian:'it', it:'it', portuguese:'pt', pt:'pt', chinese:'zh-Hans', zh:'zh-Hans', japanese:'ja', ja:'ja', korean:'ko', ko:'ko', arabic:'ar', ar:'ar' }
         let targetLang = null

@@ -1,6 +1,8 @@
 import React from 'react'
 import Navbar from './components/Navbar'
 
+// App shell: renders the Navbar and a centered main content container
+
 export default function App({ children }) {
   return (
     <div>

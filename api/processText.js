@@ -1,3 +1,6 @@
+// processText: accepts a typed question payload, optionally splits multiple items,
+// answers via Azure OpenAI when configured or falls back to math/definitions/time,
+// and can translate the final answer when the prompt asks for another language.
 import { app } from "@azure/functions";
 import { solveFromText } from "./mathSolver.js";
 import { getDefinition } from "./fallbackDefinitions.js";

@@ -1,12 +1,16 @@
 import React from 'react'
 import { createRoot } from 'react-dom/client'
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
+// Global Tailwind styles
 import './index.css'
+// App shell (navbar + container)
 import App from './App'
+// Route components
 import Home from './pages/Home'
 import About from './pages/About'
 import Contact from './pages/Contact'
 
+// Mount the React app and configure client-side routing
 createRoot(document.getElementById('root')).render(
   <React.StrictMode>
     <BrowserRouter>

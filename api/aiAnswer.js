@@ -1,5 +1,5 @@
 // Subject-agnostic answer generator using Azure OpenAI Chat Completions API.
-// No extra SDK required; uses global fetch (Node 18+). Returns structured JSON.
+// Uses global fetch (Node 18+); no SDK required. Returns a normalized JSON object.
 
 const AZURE_OPENAI_ENDPOINT = process.env.AZURE_OPENAI_ENDPOINT || ''
 const AZURE_OPENAI_KEY = process.env.AZURE_OPENAI_KEY || process.env.AZURE_OPENAI_API_KEY || ''

@@ -1,3 +1,4 @@
+/* Tailwind layers */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -7,14 +8,17 @@
   font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
 }
 
+/* Page background and default text color */
 body {
   @apply bg-sand text-slate-800;
 }
 
+/* Reusable card style */
 .card {
   @apply bg-white rounded-2xl shadow-sm border border-slate-200;
 }
 
+/* Primary button utility */
 .btn {
   @apply inline-flex items-center justify-center rounded-xl bg-brand-500 text-white px-4 py-2 font-medium hover:bg-brand-600 transition-colors;
 }
