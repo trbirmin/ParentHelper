@@ -1,10 +1,9 @@
-import React, { useEffect, useMemo, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { createPortal } from 'react-dom'
 import subjectsData from '@/data/subjects.json'
 
 export default function SubjectsBlade({ open, onClose, inline = false }) {
   const [bandIdx, setBandIdx] = useState(0)
-  const [query, setQuery] = useState('')
 
   useEffect(() => {
     if (inline) return
@@ -21,15 +20,7 @@ export default function SubjectsBlade({ open, onClose, inline = false }) {
 
   const bands = subjectsData?.gradeBands || []
   const band = bands[bandIdx] || { categories: [] }
-
-  const filteredCategories = useMemo(() => {
-    if (!query.trim()) return band.categories
-    const q = query.toLowerCase()
-    return band.categories.map(cat => ({
-      ...cat,
-      topics: (cat.topics || []).filter(t => t.toLowerCase().includes(q))
-    })).filter(cat => cat.topics.length > 0)
-  }, [band, query])
+  const categories = band.categories || []
 
   const stop = (e) => e.stopPropagation()
 
@@ -49,32 +40,19 @@ export default function SubjectsBlade({ open, onClose, inline = false }) {
             >{b.label}</button>
           ))}
         </div>
-        <div className="p-3 border-b border-slate-200">
-          <input
-            className="input"
-            placeholder="Search topics"
-            value={query}
-            onChange={(e)=>setQuery(e.target.value)}
-            aria-label="Search topics"
-          />
-        </div>
-        <div className="p-4 overflow-auto" style={{maxHeight:'calc(100vh - 11rem)'}}>
-          {filteredCategories.length === 0 ? (
-            <div className="text-slate-500 text-sm">No topics match your search.</div>
-          ) : (
-            <div className="space-y-4">
-              {filteredCategories.map((cat) => (
-                <div key={cat.name}>
-                  <div className="text-xs uppercase tracking-wide text-slate-500 mb-1">{cat.name}</div>
-                  <ul className="list-disc list-inside space-y-1">
-                    {(cat.topics || []).map((t) => (
-                      <li key={t}>{t}</li>
-                    ))}
-                  </ul>
-                </div>
-              ))}
-            </div>
-          )}
+        <div className="p-4 overflow-auto" style={{maxHeight:'calc(100vh - 9rem)'}}>
+          <div className="space-y-4">
+            {categories.map((cat) => (
+              <div key={cat.name}>
+                <div className="text-xs uppercase tracking-wide text-slate-500 mb-1">{cat.name}</div>
+                <ul className="list-disc list-inside space-y-1">
+                  {(cat.topics || []).map((t) => (
+                    <li key={t}>{t}</li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+          </div>
         </div>
       </aside>
     )
@@ -99,32 +77,19 @@ export default function SubjectsBlade({ open, onClose, inline = false }) {
             >{b.label}</button>
           ))}
         </div>
-        <div className="p-3 border-b border-slate-200">
-          <input
-            className="input"
-            placeholder="Search topics"
-            value={query}
-            onChange={(e)=>setQuery(e.target.value)}
-            aria-label="Search topics"
-          />
-        </div>
-        <div className="p-4 overflow-auto h-[calc(100%-9.5rem)]">
-          {filteredCategories.length === 0 ? (
-            <div className="text-slate-500 text-sm">No topics match your search.</div>
-          ) : (
-            <div className="space-y-4">
-              {filteredCategories.map((cat) => (
-                <div key={cat.name}>
-                  <div className="text-xs uppercase tracking-wide text-slate-500 mb-1">{cat.name}</div>
-                  <ul className="list-disc list-inside space-y-1">
-                    {(cat.topics || []).map((t) => (
-                      <li key={t}>{t}</li>
-                    ))}
-                  </ul>
-                </div>
-              ))}
-            </div>
-          )}
+        <div className="p-4 overflow-auto h-[calc(100%-7rem)]">
+          <div className="space-y-4">
+            {categories.map((cat) => (
+              <div key={cat.name}>
+                <div className="text-xs uppercase tracking-wide text-slate-500 mb-1">{cat.name}</div>
+                <ul className="list-disc list-inside space-y-1">
+                  {(cat.topics || []).map((t) => (
+                    <li key={t}>{t}</li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
     </div>,

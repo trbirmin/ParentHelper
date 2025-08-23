@@ -46,7 +46,14 @@ export default function QuestionCard({ onResult, onClear }) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ question: q, tutorMode, subject: subjectHint || undefined, grade: gradeHint || undefined, targetLang: targetLang || undefined })
       })
-      const data = await res.json().catch(() => ({ error: 'Invalid JSON response' }))
+      let data
+      const ct = res.headers.get('content-type') || ''
+      if (ct.includes('application/json')) {
+        data = await res.json()
+      } else {
+        const text = await res.text().catch(()=> '')
+        data = { error: 'Invalid JSON response', status: res.status, body: text?.slice?.(0, 1000) || '' }
+      }
       onResult?.(data)
       setQ('')
     } catch (err) {

@@ -1,5 +1,5 @@
-import React, { useEffect, useRef, useState } from 'react'
-import CropModal from './CropModal'
+import React, { useEffect, useRef, useState, Suspense } from 'react'
+const CropModal = React.lazy(() => import('./CropModal'))
 
 // CameraCard
 // - Lets users take a photo with the device camera or submit a previously captured preview
@@ -115,7 +115,14 @@ export default function CameraCard({ onResult, onClear }) {
   if (tutorMode) form.append('tutorMode', '1')
   if (targetLang) form.append('targetLang', targetLang)
       const res = await fetch('/api/processImage', { method: 'POST', body: form })
-      const data = await res.json().catch(() => ({ error: 'Invalid JSON response' }))
+      let data
+      const ct = res.headers.get('content-type') || ''
+      if (ct.includes('application/json')) {
+        data = await res.json()
+      } else {
+        const text = await res.text().catch(()=> '')
+        data = { error: 'Invalid JSON response', status: res.status, body: text?.slice?.(0, 1000) || '' }
+      }
       onResult?.(data)
   // Keep preview so the user sees the image alongside results; they can Clear or Retake
     } catch (err) {
@@ -208,7 +215,9 @@ export default function CameraCard({ onResult, onClear }) {
       </div>
 
       {showCrop && tempPreview && (
-        <CropModal src={tempPreview} onCancel={onCropCancel} onCropped={onCropDone} />
+        <Suspense fallback={null}>
+          <CropModal src={tempPreview} onCancel={onCropCancel} onCropped={onCropDone} />
+        </Suspense>
       )}
     </div>
   )

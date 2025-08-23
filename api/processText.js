@@ -14,13 +14,14 @@ app.http('processText', {
   authLevel: 'anonymous',
   route: 'processText',
   handler: async (request, context) => {
-  const body = await request.json().catch(() => ({}));
-    const question = body?.question || 'No question provided';
-    const subjectHint = body?.subject
-    const gradeHint = body?.grade
-  const tutorMode = body?.tutorMode ? true : false
-  const reqTargetLang = body?.targetLang
-    const solution = solveFromText(question)
+    try {
+      const body = await request.json().catch(() => ({}));
+      const question = body?.question || 'No question provided';
+      const subjectHint = body?.subject
+      const gradeHint = body?.grade
+      const tutorMode = body?.tutorMode ? true : false
+      const reqTargetLang = body?.targetLang
+      const solution = solveFromText(question)
 
     const splitQuestions = (text) => {
       const raw = String(text)
@@ -161,13 +162,18 @@ app.http('processText', {
       return { subject: subj, problem: qLine, answer: ans, explanation: expl, steps, originalAnswer, translation, translationTransliteration, translationDetectedLang, translationConfidence }
     }
 
-    if (items.length > 1) {
-      const out = []
-      for (const q of items) { out.push(await buildItem(q)) }
-      return { status: 200, jsonBody: { items: out } }
-    } else {
-      const one = await buildItem(items[0])
-      return { status: 200, jsonBody: one }
+      if (items.length > 1) {
+        const out = []
+        for (const q of items) { out.push(await buildItem(q)) }
+        return { status: 200, jsonBody: { items: out } }
+      } else {
+        const one = await buildItem(items[0])
+        return { status: 200, jsonBody: one }
+      }
+    } catch (err) {
+      const message = err?.message || 'Unknown error'
+      const details = err?.response?.bodyAsText || err?.response?.status || undefined
+      return { status: 500, jsonBody: { error: message, details } }
     }
   }
 });
