@@ -1,0 +1,254 @@
+{
+  "schemaVersion": "1.0",
+  "gradeBands": [
+    {
+      "id": "K-2",
+  "label": "K\u20132",
+      "categories": [
+        {
+          "name": "Math",
+          "topics": [
+            "Counting & Cardinality",
+            "Numbers & Operations in Base Ten",
+            "Addition & Subtraction",
+            "Measurement & Data",
+            "Geometry (shapes, spatial reasoning)",
+            "Time & Money",
+            "One-step Word Problems",
+            "Patterns"
+          ]
+        },
+        {
+          "name": "Science",
+          "topics": [
+            "Plants & Animals",
+            "Weather & Seasons",
+            "The Five Senses",
+            "Forces & Motion (push/pull)",
+            "Earth & Sky",
+            "Habitats",
+            "Properties of Materials"
+          ]
+        },
+        {
+          "name": "ELA",
+          "topics": [
+            "Phonological Awareness & Phonics",
+            "Sight Words",
+            "Reading Comprehension (stories)",
+            "Main Idea & Details",
+            "Basic Grammar (nouns, verbs, adjectives)",
+            "Writing Simple Sentences",
+            "Vocabulary"
+          ]
+        },
+        {
+          "name": "Social Studies",
+          "topics": [
+            "Community Helpers",
+            "Rules & Citizenship",
+            "Families & Cultures",
+            "Maps & Directions",
+            "Holidays & Traditions"
+          ]
+        },
+        {
+          "name": "Other",
+          "topics": [
+            "Art",
+            "Music",
+            "PE/Health",
+            "Social-Emotional Learning (SEL)"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "3-5",
+  "label": "3\u20135",
+      "categories": [
+        {
+          "name": "Math",
+          "topics": [
+            "Multiplication & Division",
+            "Fractions (concepts, equivalence)",
+            "Decimals (tenths, hundredths)",
+            "Place Value",
+            "Measurement & Data (area, perimeter)",
+            "Geometry (polygons, angles)",
+            "Multi-step Word Problems",
+            "Patterns & Relationships"
+          ]
+        },
+        {
+          "name": "Science",
+          "topics": [
+            "Life Cycles & Ecosystems",
+            "Matter (states & properties)",
+            "Energy (light, sound, heat)",
+            "Earth Systems (rocks, soil, water cycle)",
+            "Space (sun, moon, planets)",
+            "Simple Machines",
+            "Human Body Systems (basics)"
+          ]
+        },
+        {
+          "name": "ELA",
+          "topics": [
+            "Reading Comprehension (literary & informational)",
+            "Theme, Summary, & Inference",
+            "Text Features & Structures",
+            "Writing Paragraphs & Essays",
+            "Grammar (parts of speech, punctuation)",
+            "Vocabulary (prefixes/suffixes)",
+            "Figurative Language"
+          ]
+        },
+        {
+          "name": "Social Studies",
+          "topics": [
+            "US Regions & Geography",
+            "World Communities",
+            "US History (early foundations)",
+            "Government & Civics (basics)",
+            "Economics (producers/consumers)",
+            "Maps & Timelines"
+          ]
+        },
+        {
+          "name": "Other",
+          "topics": [
+            "Technology & Typing",
+            "Digital Citizenship",
+            "Art/Music/Health"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "6-8",
+  "label": "6\u20138",
+      "categories": [
+        {
+          "name": "Math",
+          "topics": [
+            "Ratios & Proportional Relationships",
+            "Integers & Rational Numbers",
+            "Expressions & Equations",
+            "Inequalities",
+            "Linear Relationships",
+            "Geometry (transformations, similarity)",
+            "Surface Area & Volume",
+            "Statistics & Probability"
+          ]
+        },
+        {
+          "name": "Science",
+          "topics": [
+            "Cells & Heredity",
+            "Human Body Systems",
+            "Ecology & Ecosystems",
+            "Chemistry Basics (atoms, periodic table)",
+            "Forces & Motion",
+            "Energy (transfer & conservation)",
+            "Earth History & Plate Tectonics",
+            "Weather & Climate",
+            "Astronomy (solar system, universe)"
+          ]
+        },
+        {
+          "name": "ELA",
+          "topics": [
+            "Close Reading & Text Evidence",
+            "Central Idea & Theme",
+            "Literary Analysis",
+            "Argumentative & Informational Writing",
+            "Research Skills",
+            "Grammar (clauses, phrases, usage)",
+            "Vocabulary (Greek/Latin roots)"
+          ]
+        },
+        {
+          "name": "Social Studies",
+          "topics": [
+            "Ancient Civilizations",
+            "Middle Ages & Renaissance",
+            "World Geography & Cultures",
+            "US History (founding to Reconstruction)",
+            "Civics & Constitution",
+            "Economics (markets, trade)"
+          ]
+        },
+        {
+          "name": "Other",
+          "topics": [
+            "Computer Science (intro coding)",
+            "Digital Literacy",
+            "Career Exploration"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "9-12",
+  "label": "9\u201312",
+      "categories": [
+        {
+          "name": "Math",
+          "topics": [
+            "Algebra I (linear & quadratic)",
+            "Geometry (proofs, congruence, similarity)",
+            "Algebra II (polynomials, exponential, logarithmic)",
+            "Trigonometry",
+            "Precalculus",
+            "Calculus (limits, derivatives - intro)",
+            "Statistics & Probability"
+          ]
+        },
+        {
+          "name": "Science",
+          "topics": [
+            "Biology (cells, genetics, evolution, ecology)",
+            "Chemistry (stoichiometry, reactions, equilibrium)",
+            "Physics (kinematics, dynamics, energy)",
+            "Earth/Environmental Science",
+            "Anatomy & Physiology",
+            "Astronomy"
+          ]
+        },
+        {
+          "name": "ELA",
+          "topics": [
+            "American/British/World Literature",
+            "Rhetorical Analysis",
+            "Argumentative & Research Writing",
+            "Synthesis & Citation",
+            "Grammar & Style",
+            "Vocabulary (academic)",
+            "SAT/ACT Reading & Writing (practice)"
+          ]
+        },
+        {
+          "name": "Social Studies",
+          "topics": [
+            "World History",
+            "US History",
+            "Government & Civics",
+            "Economics (micro, macro, personal finance)",
+            "Geography",
+            "Psychology & Sociology"
+          ]
+        },
+        {
+          "name": "Other",
+          "topics": [
+            "Computer Science (programming, data structures)",
+            "Foreign Languages",
+            "Career & Technical Education (CTE)",
+            "Health/PE"
+          ]
+        }
+      ]
+    }
+  ]
+}

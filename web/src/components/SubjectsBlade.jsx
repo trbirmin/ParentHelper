@@ -1,65 +1,98 @@
-import React, { useMemo, useState } from 'react'
+import React, { useEffect, useState } from 'react'
+import { createPortal } from 'react-dom'
+import subjectsData from '@/data/subjects.json'
 
-// Simple subject catalog grouped by grade bands
-const SUBJECTS = [
-  {
-    id: 'k2',
-    label: 'K–2',
-    items: ['Reading', 'Phonics', 'Handwriting', 'Numbers & Counting', 'Shapes', 'Time', 'Science Basics']
-  },
-  {
-    id: '35',
-    label: '3–5',
-    items: ['ELA', 'Math (Fractions, Decimals)', 'Science', 'Social Studies', 'Geography', 'Art', 'Music']
-  },
-  {
-    id: '68',
-    label: '6–8',
-    items: ['ELA', 'Pre-Algebra', 'Algebra I', 'Life Science', 'Earth Science', 'World History', 'Civics', 'Computer Science']
-  },
-  {
-    id: '912',
-    label: '9–12',
-    items: ['ELA', 'Algebra II', 'Geometry', 'Precalculus', 'Biology', 'Chemistry', 'Physics', 'US History', 'Economics', 'Spanish', 'French']
-  }
-]
-
-export default function SubjectsBlade({ open = true, onSelect, inline = true }) {
+export default function SubjectsBlade({ open, onClose, inline = false }) {
   const [bandIdx, setBandIdx] = useState(0)
-  const bands = useMemo(() => SUBJECTS, [])
-  const band = bands[bandIdx]
 
-  if (!open) return null
+  useEffect(() => {
+    if (inline) return
+    if (!open) return
+    const prev = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+    const onKey = (e) => { if (e.key === 'Escape') onClose?.() }
+    window.addEventListener('keydown', onKey)
+    return () => {
+      document.body.style.overflow = prev
+      window.removeEventListener('keydown', onKey)
+    }
+  }, [open, onClose, inline])
+
+  const bands = subjectsData?.gradeBands || []
+  const band = bands[bandIdx] || { categories: [] }
+  const categories = band.categories || []
+
+  const stop = (e) => e.stopPropagation()
 
   if (inline) {
     return (
-      <aside className="card w-full sm:w-[18rem] lg:w-[22rem] h-fit sticky top-4 self-start">
-        <div className="p-4 border-b border-slate-200 dark:border-slate-700">
+      <aside className="card w-full sm:w-[20rem] lg:w-[24rem] min-h-screen">
+        <div className="p-4 border-b border-slate-200">
           <h2 className="font-semibold">Subjects</h2>
         </div>
-        <div className="p-4 flex gap-2 flex-wrap">
+        <div className="p-3 border-b border-slate-200 flex flex-wrap gap-2">
           {bands.map((b, i) => (
             <button
               key={b.id}
-              className={`px-3 py-1.5 rounded-xl border text-sm ${i===bandIdx ? 'bg-brand-50 border-brand-300 text-brand-800' : 'bg-white dark:bg-slate-800 border-slate-300 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-100'}`}
+              className={`px-3 py-1.5 rounded-xl border text-sm ${i===bandIdx ? 'bg-brand-50 border-brand-300 text-brand-800' : 'bg-white border-slate-300 hover:bg-slate-50 text-slate-800'}`}
               onClick={() => setBandIdx(i)}
               aria-pressed={i===bandIdx}
             >{b.label}</button>
           ))}
         </div>
-        <ul className="p-4 space-y-1">
-          {band.items.map((s) => (
-            <li key={s}>
-              <button
-                className="w-full text-left px-3 py-2 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-700"
-                onClick={() => onSelect?.(s)}
-              >{s}</button>
-            </li>
-          ))}
-        </ul>
+        <div className="p-4 overflow-auto" style={{maxHeight:'calc(100vh - 9rem)'}}>
+          <div className="space-y-4">
+            {categories.map((cat) => (
+              <div key={cat.name}>
+                <div className="text-xs uppercase tracking-wide text-slate-500 mb-1">{cat.name}</div>
+                <ul className="list-disc list-inside space-y-1">
+                  {(cat.topics || []).map((t) => (
+                    <li key={t}>{t}</li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+          </div>
+        </div>
       </aside>
     )
   }
 
-  return null
+  if (!open) return null
+  return createPortal(
+    <div className="fixed inset-0 z-[10000]" role="dialog" aria-modal="true" onClick={onClose}>
+      <div className="absolute inset-0 bg-black/40" />
+      <div className="absolute left-0 top-0 h-full w-full sm:w-[28rem] card rounded-none shadow-xl" onClick={stop}>
+        <div className="p-4 border-b border-slate-200 flex items-center justify-between">
+          <h2 className="font-semibold">Subjects</h2>
+          <button className="btn bg-slate-500 hover:bg-slate-600" onClick={onClose}>Close</button>
+        </div>
+        <div className="p-3 border-b border-slate-200 flex flex-wrap gap-2">
+          {bands.map((b, i) => (
+            <button
+              key={b.id}
+              className={`px-3 py-1.5 rounded-xl border text-sm ${i===bandIdx ? 'bg-brand-50 border-brand-300 text-brand-800' : 'bg-white border-slate-300 hover:bg-slate-50 text-slate-800'}`}
+              onClick={() => setBandIdx(i)}
+              aria-pressed={i===bandIdx}
+            >{b.label}</button>
+          ))}
+        </div>
+        <div className="p-4 overflow-auto h-[calc(100%-7rem)]">
+          <div className="space-y-4">
+            {categories.map((cat) => (
+              <div key={cat.name}>
+                <div className="text-xs uppercase tracking-wide text-slate-500 mb-1">{cat.name}</div>
+                <ul className="list-disc list-inside space-y-1">
+                  {(cat.topics || []).map((t) => (
+                    <li key={t}>{t}</li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>,
+    document.body
+  )
 }

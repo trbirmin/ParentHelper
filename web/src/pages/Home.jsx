@@ -2,7 +2,7 @@ import React, { useState } from 'react'
 import UploadCard from '@/components/UploadCard'
 import CameraCard from '@/components/CameraCard'
 import QuestionCard from '@/components/QuestionCard'
-import SubjectsBlade from '@/components/SubjectsBlade'
+// Subjects sidebar is rendered by App shell; Home focuses on cards and results
 
 export default function Home() {
   const [result, setResult] = useState(null)
@@ -34,15 +34,10 @@ export default function Home() {
         <p className="text-slate-600 max-w-3xl mx-auto">Upload a worksheet, snap a picture, or type a question. We’ll guide you with clear, parent-friendly explanations.</p>
       </section>
 
-      <section className="grid grid-cols-1 lg:grid-cols-[22rem_1fr] gap-6 items-start">
-        <div>
-          <SubjectsBlade inline open onSelect={(s)=>console.log('Subject selected:', s)} />
-        </div>
-        <div className="grid sm:grid-cols-2 xl:grid-cols-3 gap-5">
-          <UploadCard onResult={setResult} onClear={()=>setResult(null)} />
-          <CameraCard onResult={setResult} onClear={()=>setResult(null)} />
-          <QuestionCard onResult={setResult} onClear={()=>setResult(null)} />
-        </div>
+      <section className="grid sm:grid-cols-2 xl:grid-cols-3 gap-5">
+        <UploadCard onResult={setResult} onClear={()=>setResult(null)} />
+        <CameraCard onResult={setResult} onClear={()=>setResult(null)} />
+        <QuestionCard onResult={setResult} onClear={()=>setResult(null)} />
       </section>
 
       {result && (
