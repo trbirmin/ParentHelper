@@ -1,3 +1,4 @@
+/* Tailwind layers */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -7,14 +8,87 @@
   font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
 }
 
+/* Page background and default text color */
 body {
   @apply bg-sand text-slate-800;
 }
 
+/* Reusable card style */
 .card {
   @apply bg-white rounded-2xl shadow-sm border border-slate-200;
 }
 
+/* Primary button utility */
 .btn {
   @apply inline-flex items-center justify-center rounded-xl bg-brand-500 text-white px-4 py-2 font-medium hover:bg-brand-600 transition-colors;
+}
+
+/* Text input utility */
+.input {
+  @apply w-full rounded-xl border border-slate-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-brand-300;
+}
+
+/* Dark mode and high contrast support via data attributes on <html> */
+html[data-theme="dark"] body {
+  @apply bg-slate-900 text-slate-100;
+}
+html[data-theme="dark"] .card {
+  @apply bg-slate-800 border-slate-700;
+}
+html[data-theme="dark"] .btn {
+  @apply bg-brand-400 hover:bg-brand-500 text-slate-900;
+}
+html[data-theme="dark"] .input {
+  @apply bg-slate-800 border-slate-600 text-slate-100;
+}
+
+html[data-contrast="high"] body {
+  @apply bg-white text-black;
+}
+html[data-contrast="high"] .card {
+  @apply bg-white border-black;
+}
+html[data-contrast="high"] .btn {
+  @apply bg-black text-white hover:bg-black;
+}
+html[data-contrast="high"] .input {
+  @apply border-black;
+}
+
+/* Dyslexic-friendly font toggle */
+/* Note: To use the actual OpenDyslexic typeface without system install,
+   place the webfont files in /public/fonts and add sources here, e.g.:
+   src: local('OpenDyslexic'), url('/fonts/OpenDyslexic-Regular.woff2') format('woff2'); */
+@font-face {
+  font-family: 'OpenDyslexic';
+  src: local('OpenDyslexic');
+  font-display: swap;
+}
+html[data-font="dyslexic"] body {
+  /* Provide readable fallbacks if OpenDyslexic isn’t installed */
+  font-family: 'OpenDyslexic', 'Comic Sans MS', 'Atkinson Hyperlegible', ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+  /* Spacing tweaks that aid many readers with dyslexia */
+  letter-spacing: 0.02em;
+  word-spacing: 0.04em;
+  line-height: 1.6;
+}
+/* Ensure key controls inherit the dyslexic font and spacing */
+html[data-font="dyslexic"] h1,
+html[data-font="dyslexic"] h2,
+html[data-font="dyslexic"] h3,
+html[data-font="dyslexic"] h4,
+html[data-font="dyslexic"] h5,
+html[data-font="dyslexic"] h6,
+html[data-font="dyslexic"] .btn,
+html[data-font="dyslexic"] .input,
+html[data-font="dyslexic"] select,
+html[data-font="dyslexic"] textarea,
+html[data-font="dyslexic"] button {
+  font-family: inherit;
+}
+
+/* Better focus visibility */
+*:focus-visible {
+  outline: 3px solid #4ea6ff;
+  outline-offset: 2px;
 }

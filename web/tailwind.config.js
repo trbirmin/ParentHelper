@@ -1,9 +1,14 @@
-/** @type {import('tailwindcss').Config} */
+/**
+ * Tailwind CSS configuration
+ * - content: files to scan for class names
+ * - theme.extend: custom brand palette, radii, and base font sizes
+ */
 export default {
   content: [
     './index.html',
     './src/**/*.{js,jsx,ts,tsx}'
   ],
+  darkMode: ['class', '[data-theme="dark"]'],
   theme: {
     extend: {
       colors: {
@@ -33,5 +38,6 @@ export default {
       }
     }
   },
+  // Add Tailwind plugins here if needed (forms, typography, etc.)
   plugins: []
 }
