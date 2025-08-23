@@ -28,15 +28,11 @@ jobs:
           echo "api_location=api"
           echo "output_location=dist"
 
-      - name: Install OIDC Client from Core Package
-        run: npm install @actions/core@1.10.0 @actions/http-client
-
       - name: Get GitHub OIDC Id Token
         uses: actions/github-script@v7
         id: idtoken
         with:
           script: |
-            const core = require('@actions/core');
             return await core.getIDToken();
           result-encoding: string
 
