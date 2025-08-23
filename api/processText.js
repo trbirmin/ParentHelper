@@ -69,6 +69,19 @@ app.http('processText', {
 
     const items = splitQuestions(question)
 
+    const norm = (s='') => String(s).toLowerCase().replace(/\s+/g,' ').replace(/[\p{P}\p{S}]/gu,'').trim()
+    const isEchoOf = (text, q) => {
+      if (!text || !q) return false
+      const a = norm(text)
+      const b = norm(q)
+      if (!a || !b) return false
+      if (a === b) return true
+      // Consider echo if one contains the other and shorter is >= 0.8 of longer
+      const shorter = a.length <= b.length ? a : b
+      const longer = a.length > b.length ? a : b
+      return longer.includes(shorter) && shorter.length / longer.length >= 0.8
+    }
+
     const buildItem = async (qLine) => {
       // Simple target language detection: phrases like "in French", "in Spanish", or explicit code like "-> fr"
       const langMap = {
@@ -106,6 +119,10 @@ app.http('processText', {
       let ans = (ai?.ok && (ai.answer.answer ?? null)) || (mathTry.success ? String(mathTry.result) : null)
       let steps = (ai?.ok && Array.isArray(ai.answer.steps) ? ai.answer.steps : []) || (mathTry.success ? mathTry.steps : [])
       let expl = (ai?.ok && (ai.answer.explanation || (steps.length ? steps.join(' -> ') : null))) || (mathTry.success ? mathTry.steps.join(' | ') : null)
+      // If the explanation merely repeats the question, prefer steps or leave empty
+      if (expl && isEchoOf(expl, qLine)) {
+        expl = steps && steps.length ? steps.join(' -> ') : null
+      }
       if (!ans && !expl) {
         const def = getDefinition(qLine)
         if (def.ok) {
@@ -123,8 +140,9 @@ app.http('processText', {
         }
       }
 
-      // If no general answer, attempt ELA helpers on prose
-      if (!ans && !expl && /[a-zA-Z]/.test(qLine)) {
+      // If no general answer, consider ELA helpers ONLY when the user asks for ELA-type analysis
+      const isELAIntent = (s = '') => /\b(reading\s+level|grade\s+level|readability|vocabulary|key\s+vocabulary|grammar|revise|rewrite|paraphrase|summarize\s+this\s+text|parts\s+of\s+speech|nouns?|verbs?|adjectives?|adverbs?)\b/i.test(String(s))
+      if (!ans && !expl && /[a-zA-Z]/.test(qLine) && (subjectHint === 'ela' || isELAIntent(qLine))) {
         const ela = analyzeELA(qLine)
         if (ela.ok) {
           subj = subj || ela.subject
@@ -159,7 +177,7 @@ app.http('processText', {
           }
         } catch {}
       }
-      return { subject: subj, problem: qLine, answer: ans, explanation: expl, steps, originalAnswer, translation, translationTransliteration, translationDetectedLang, translationConfidence }
+  return { subject: subj, problem: qLine, answer: ans, explanation: expl, steps, originalAnswer, translation, translationTransliteration, translationDetectedLang, translationConfidence }
     }
 
       if (items.length > 1) {

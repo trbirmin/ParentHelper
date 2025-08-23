@@ -211,7 +211,19 @@ function ResultModal({ result, onClose, asText }) {
             )}
             {!speaking ? (
               <button className="btn" onClick={()=>{
-                const text = Array.isArray(result?.items) ? result.items.map(it=>asText(it.answer||it.explanation)).join('. ') : asText(result.answer||result.explanation)
+                const buildItemText = (it) => {
+                  const parts = []
+                  const q = asText(it?.problem)
+                  const a = asText(it?.answer)
+                  const e = asText(it?.explanation)
+                  if (q) parts.push(`Question: ${q}`)
+                  if (a) parts.push(`Answer: ${a}`)
+                  if (e) parts.push(`Explanation: ${e}`)
+                  return parts.join('. ')
+                }
+                const text = Array.isArray(result?.items)
+                  ? result.items.map(buildItemText).filter(Boolean).join('. ')
+                  : buildItemText(result)
                 speak(text)
               }}>Read aloud</button>
             ) : (
@@ -239,7 +251,12 @@ function ResultModal({ result, onClose, asText }) {
                     <div className={bilingual && lang ? 'grid md:grid-cols-2 gap-4' : ''}>
                       <div>
                         <div className="text-xs uppercase tracking-wide text-slate-500 mb-1">Question {idx + 1}{subj ? ` • ${subj}` : ''}</div>
-                        {prob && <div className="font-medium mb-1">{prob}</div>}
+                        {prob && (
+                          <div className="mt-1">
+                            <div className="text-xs text-slate-500">Question</div>
+                            <div className="font-medium">{prob}</div>
+                          </div>
+                        )}
                         {ans && (
                           <div className="mt-2">
                             <div className="text-xs text-slate-500">Answer</div>
@@ -317,7 +334,12 @@ function ResultModal({ result, onClose, asText }) {
                       {subj && <span>{subj}</span>}
                       {handwriting && <span className="px-2 py-0.5 rounded-full bg-amber-100 text-amber-700">Handwriting</span>}
                     </div>
-                    {prob && <div className="font-medium">{prob}</div>}
+                    {prob && (
+                      <div className="mt-1">
+                        <div className="text-xs text-slate-500">Question</div>
+                        <div className="font-medium">{prob}</div>
+                      </div>
+                    )}
                     <div className={bilingual ? 'grid md:grid-cols-2 gap-4' : ''}>
                       <div>
                         {ans && (

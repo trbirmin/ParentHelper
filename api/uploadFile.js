@@ -362,6 +362,18 @@ app.http('uploadFile', {
       questions = deduped.slice(0, limit)
 
   // Build a single response item using AOAI (if available) or fallbacks
+  const norm = (s='') => String(s).toLowerCase().replace(/\s+/g,' ').replace(/[\p{P}\p{S}]/gu,'').trim()
+  const isEchoOf = (text, q) => {
+    if (!text || !q) return false
+    const a = norm(text)
+    const b = norm(q)
+    if (!a || !b) return false
+    if (a === b) return true
+    const shorter = a.length <= b.length ? a : b
+    const longer = a.length > b.length ? a : b
+    return longer.includes(shorter) && shorter.length / longer.length >= 0.8
+  }
+
   const buildItem = async (problemLine) => {
         const lower = String(problemLine || '').toLowerCase()
         const langMap = { french:'fr', fr:'fr', spanish:'es', es:'es', german:'de', de:'de', italian:'it', it:'it', portuguese:'pt', pt:'pt', chinese:'zh-Hans', zh:'zh-Hans', japanese:'ja', ja:'ja', korean:'ko', ko:'ko', arabic:'ar', ar:'ar' }
@@ -401,6 +413,9 @@ app.http('uploadFile', {
   let ans = (aiItem?.ok && (aiItem.answer.answer ?? null)) || (mathTry.success ? String(mathTry.result) : null)
   let steps = (aiItem?.ok && Array.isArray(aiItem.answer.steps) ? aiItem.answer.steps : []) || (mathTry.success ? mathTry.steps : [])
   let expl = (aiItem?.ok && (aiItem.answer.explanation || (steps.length ? steps.join(' -> ') : null))) || (mathTry.success ? mathTry.steps.join(' | ') : null)
+        if (expl && isEchoOf(expl, problemLine)) {
+          expl = steps && steps.length ? steps.join(' -> ') : null
+        }
         if (!ans && !expl) {
           const def = getDefinition(problemLine)
           if (def.ok) {

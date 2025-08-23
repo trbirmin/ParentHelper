@@ -43,6 +43,13 @@ const entries = [
     answer: 'Temperature measures how hot or cold something is—related to the average kinetic energy of its particles.',
     explanation: 'Common units are Celsius (°C), Fahrenheit (°F), and Kelvin (K). We measure temperature with a thermometer.'
   },
+  // --- Science: Light scattering & sky color ---
+  {
+    keys: [/\bwhy\s+is\s+the\s+sky\s+blue\b/i, /\bsky\s+blue\b/i],
+    subject: 'science',
+    answer: 'Because air molecules scatter shorter (blue) wavelengths of sunlight more than longer (red) ones.',
+    explanation: 'Sunlight is made of many colors. In our atmosphere, tiny molecules cause Rayleigh scattering, which is stronger for shorter wavelengths. Blue light is scattered in all directions, so the sky looks blue from most angles. At sunrise and sunset, the longer path through air leaves mostly reds/oranges for your eyes.'
+  },
   {
     keys: [/\b(how\s+do\s+i\s+calculate\s+temperature|how\s+to\s+calculate\s+temperature)\b/i],
     subject: 'science',

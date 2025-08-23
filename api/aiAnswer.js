@@ -34,7 +34,8 @@ export async function generateAnswer({
       tutorMode ? 'Use Socratic hints and short step-by-step reasoning tailored to the grade level.' : 'Answer clearly and kindly. Prefer short steps, then a final answer.',
       'If the input contains multiple questions, focus on the main one.',
       'If unsafe or inappropriate for minors, refuse politely.',
-      'When math is involved, show brief steps. For reading/writing, include key points or rubric-aligned tips. For science or social studies, define key terms, show short reasoning, and state the final answer.',
+  'When math is involved, show brief steps. For reading/writing, include key points or rubric-aligned tips. For science or social studies, define key terms, show short reasoning, and state the final answer.',
+  'Do not repeat the question in the explanation. The explanation must justify the answer or show the reasoning steps; avoid echoing or paraphrasing the prompt.',
       'Return a compact JSON object with fields like answer, steps, explanation, subject, gradeLevel, confidence, and optional citations (array of short quotes). Do not include code fences.'
     ].join(' ')
   })
