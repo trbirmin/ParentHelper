@@ -26,7 +26,7 @@ export default function SubjectsBlade({ open, onClose, inline = false }) {
 
   if (inline) {
     return (
-      <aside className="w-full sm:w-[20rem] lg:w-[24rem] border-r border-slate-200 bg-white min-h-screen">
+      <aside className="card w-full sm:w-[20rem] lg:w-[24rem] min-h-screen">
         <div className="p-4 border-b border-slate-200">
           <h2 className="font-semibold">Subjects</h2>
         </div>
@@ -34,7 +34,7 @@ export default function SubjectsBlade({ open, onClose, inline = false }) {
           {bands.map((b, i) => (
             <button
               key={b.id}
-              className={`px-3 py-1.5 rounded-xl border text-sm ${i===bandIdx ? 'bg-brand-50 border-brand-300 text-brand-800' : 'bg-white border-slate-300 hover:bg-slate-50'}`}
+              className={`px-3 py-1.5 rounded-xl border text-sm ${i===bandIdx ? 'bg-brand-50 border-brand-300 text-brand-800' : 'bg-white border-slate-300 hover:bg-slate-50 text-slate-800'}`}
               onClick={() => setBandIdx(i)}
               aria-pressed={i===bandIdx}
             >{b.label}</button>
@@ -62,7 +62,7 @@ export default function SubjectsBlade({ open, onClose, inline = false }) {
   return createPortal(
     <div className="fixed inset-0 z-[10000]" role="dialog" aria-modal="true" onClick={onClose}>
       <div className="absolute inset-0 bg-black/40" />
-      <div className="absolute left-0 top-0 h-full w-full sm:w:[28rem] bg-white shadow-xl" onClick={stop}>
+      <div className="absolute left-0 top-0 h-full w-full sm:w-[28rem] card rounded-none shadow-xl" onClick={stop}>
         <div className="p-4 border-b border-slate-200 flex items-center justify-between">
           <h2 className="font-semibold">Subjects</h2>
           <button className="btn bg-slate-500 hover:bg-slate-600" onClick={onClose}>Close</button>
@@ -71,7 +71,7 @@ export default function SubjectsBlade({ open, onClose, inline = false }) {
           {bands.map((b, i) => (
             <button
               key={b.id}
-              className={`px-3 py-1.5 rounded-xl border text-sm ${i===bandIdx ? 'bg-brand-50 border-brand-300 text-brand-800' : 'bg-white border-slate-300 hover:bg-slate-50'}`}
+              className={`px-3 py-1.5 rounded-xl border text-sm ${i===bandIdx ? 'bg-brand-50 border-brand-300 text-brand-800' : 'bg-white border-slate-300 hover:bg-slate-50 text-slate-800'}`}
               onClick={() => setBandIdx(i)}
               aria-pressed={i===bandIdx}
             >{b.label}</button>

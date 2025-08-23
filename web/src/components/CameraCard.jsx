@@ -23,10 +23,7 @@ export default function CameraCard({ onResult, onClear }) {
   const mediaStreamRef = useRef(null)
   const [showCrop, setShowCrop] = useState(false)
   const [tempPreview, setTempPreview] = useState('')
-  const [tutorMode, setTutorMode] = useState(false)
-  const [subjectHint, setSubjectHint] = useState('')
-  const [gradeHint, setGradeHint] = useState('')
-  const [targetLang, setTargetLang] = useState('')
+  // Removed tutor mode, subject/grade hints, and target language inputs
 
   useEffect(() => {
     // When a new file is set, create a blob URL for the preview
@@ -110,10 +107,7 @@ export default function CameraCard({ onResult, onClear }) {
       // Send the captured/selected file to the API as `image`
       const form = new FormData()
       form.append('image', file)
-  if (subjectHint) form.append('subject', subjectHint)
-  if (gradeHint) form.append('grade', gradeHint)
-  if (tutorMode) form.append('tutorMode', '1')
-  if (targetLang) form.append('targetLang', targetLang)
+  // Removed subject, grade, tutorMode, and targetLang fields
       const res = await fetch('/api/processImage', { method: 'POST', body: form })
       let data
       const ct = res.headers.get('content-type') || ''
@@ -158,13 +152,13 @@ export default function CameraCard({ onResult, onClear }) {
   return (
     <div className="card p-5 flex flex-col gap-4">
       {/* Title and help text */}
-      <h2 className="font-semibold text-lg">Take picture</h2>
+  <h2 className="font-semibold text-lg">Take picture</h2>
       <p className="text-slate-600">Use your camera to snap the homework. If camera access is blocked, please use the Upload file option.</p>
 
       {/* Live camera toggle */}
-      <div className="flex flex-col sm:flex-row gap-3">
-        <button className="btn text-lg py-3 w-full" onClick={startLive}>
-          {streaming ? 'Camera on' : 'Use live camera'}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 place-items-center">
+        <button className="btn text-lg py-3 px-5 whitespace-nowrap justify-self-center sm:col-span-2" onClick={startLive}>
+          {streaming ? 'Camera on' : 'Turn on camera'}
         </button>
       </div>
 
@@ -179,9 +173,9 @@ export default function CameraCard({ onResult, onClear }) {
       {streaming && (
         <div className="rounded-2xl border border-slate-200 overflow-hidden">
           <video ref={videoRef} className="w-full h-64 object-cover" playsInline muted />
-          <div className="p-3 flex gap-3">
-            <button className="btn" onClick={capture}>Capture</button>
-            <button className="btn bg-slate-500 hover:bg-slate-600" onClick={stopLive}>Stop camera</button>
+          <div className="p-3 grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <button className="btn w-full" onClick={capture}>Capture</button>
+            <button className="btn bg-slate-500 hover:bg-slate-600 w-full" onClick={stopLive}>Stop camera</button>
           </div>
           <canvas ref={canvasRef} className="hidden" />
         </div>
@@ -194,24 +188,15 @@ export default function CameraCard({ onResult, onClear }) {
         </div>
       )}
 
-      {/* Optional hints */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-        <input className="input" placeholder="Subject (optional)" value={subjectHint} onChange={(e)=>setSubjectHint(e.target.value)} />
-        <input className="input" placeholder="Grade (optional)" value={gradeHint} onChange={(e)=>setGradeHint(e.target.value)} />
-        <label className="flex items-center gap-2 text-sm">
-          <input type="checkbox" checked={tutorMode} onChange={(e)=>setTutorMode(e.target.checked)} />
-          Tutor mode (step-by-step, Socratic hints)
-        </label>
-        <input className="input" placeholder="Target language (e.g., fr, es)" value={targetLang} onChange={(e)=>setTargetLang(e.target.value)} />
-      </div>
+  {/* Removed Subject, Grade, Tutor mode, and Target language inputs */}
 
       {/* Submission and reset controls */}
-      <div className="flex gap-3">
-        <button className="btn text-lg py-3 w-full" onClick={onSubmit} disabled={!file || loading}>
-          {loading ? 'Sending…' : 'Submit photo'}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 items-center">
+        <button className="btn text-lg py-3 w-full whitespace-nowrap" onClick={onSubmit} disabled={!file || loading}>
+          {loading ? 'Sending…' : 'Submit'}
         </button>
-        <button className="btn bg-slate-500 hover:bg-slate-600 w-full" type="button" onClick={clear}>Clear</button>
-        <button className="btn bg-slate-700 hover:bg-slate-800 w-full" type="button" onClick={startLive}>Retake</button>
+        <button className="btn bg-slate-500 hover:bg-slate-600 w-full whitespace-nowrap" type="button" onClick={clear}>Clear</button>
+        <button className="btn bg-slate-700 hover:bg-slate-800 w-full whitespace-nowrap" type="button" onClick={startLive}>Retake</button>
       </div>
 
       {showCrop && tempPreview && (

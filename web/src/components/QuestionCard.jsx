@@ -14,10 +14,7 @@ export default function QuestionCard({ onResult, onClear }) {
   const [speechSupported, setSpeechSupported] = useState(false)
   const [speechError, setSpeechError] = useState('')
   const recognitionRef = useRef(null)
-  const [tutorMode, setTutorMode] = useState(false)
-  const [subjectHint, setSubjectHint] = useState('')
-  const [gradeHint, setGradeHint] = useState('')
-  const [targetLang, setTargetLang] = useState('')
+  // Removed tutor mode, subject/grade hints, and target language inputs
 
   useEffect(() => {
     // Detect browser speech recognition support and cleanup on unmount
@@ -44,7 +41,7 @@ export default function QuestionCard({ onResult, onClear }) {
       const res = await fetch('/api/processText', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ question: q, tutorMode, subject: subjectHint || undefined, grade: gradeHint || undefined, targetLang: targetLang || undefined })
+  body: JSON.stringify({ question: q })
       })
       let data
       const ct = res.headers.get('content-type') || ''
@@ -106,7 +103,7 @@ export default function QuestionCard({ onResult, onClear }) {
 
   return (
     <div className="card p-5 flex flex-col gap-4">
-      <h2 className="font-semibold text-lg">Type or speak a question</h2>
+  <h2 className="font-semibold text-lg">Type or speak a question</h2>
       <form onSubmit={submit} className="flex flex-col gap-3">
         <textarea
           value={q}
@@ -139,20 +136,12 @@ export default function QuestionCard({ onResult, onClear }) {
         {speechError && (
           <div className="text-sm text-red-600">{speechError}</div>
         )}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          <input className="input" placeholder="Subject (optional)" value={subjectHint} onChange={(e)=>setSubjectHint(e.target.value)} />
-          <input className="input" placeholder="Grade (optional)" value={gradeHint} onChange={(e)=>setGradeHint(e.target.value)} />
-          <label className="flex items-center gap-2 text-sm">
-            <input type="checkbox" checked={tutorMode} onChange={(e)=>setTutorMode(e.target.checked)} />
-            Tutor mode (step-by-step, Socratic hints)
-          </label>
-          <input className="input" placeholder="Target language (e.g., fr, es)" value={targetLang} onChange={(e)=>setTargetLang(e.target.value)} />
-        </div>
-        <div className="flex gap-3">
-          <button type="submit" className="btn text-lg py-3" disabled={!canSubmit}>
-            {loading ? 'Submitting…' : 'Submit question'}
+  {/* Removed Subject, Grade, Tutor mode, and Target language inputs */}
+        <div className="grid grid-cols-2 gap-3 items-center">
+          <button type="submit" className="btn text-lg py-3 w-full whitespace-nowrap" disabled={!canSubmit}>
+            {loading ? 'Submitting…' : 'Submit'}
           </button>
-          <button type="button" className="btn bg-slate-500 hover:bg-slate-600" onClick={clear}>Clear</button>
+          <button type="button" className="btn bg-slate-500 hover:bg-slate-600 w-full whitespace-nowrap" onClick={clear}>Clear</button>
         </div>
       </form>
     </div>

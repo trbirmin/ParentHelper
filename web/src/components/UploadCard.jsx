@@ -30,10 +30,7 @@ export default function UploadCard({ onResult, onClear }) {
   const inputRef = useRef(null)
   const [showCrop, setShowCrop] = useState(false)
   const [tempPreview, setTempPreview] = useState('')
-  const [tutorMode, setTutorMode] = useState(false)
-  const [subjectHint, setSubjectHint] = useState('')
-  const [gradeHint, setGradeHint] = useState('')
-  const [targetLang, setTargetLang] = useState('')
+  // Removed tutor mode, subject/grade hints, and target language inputs
 
   const validate = (f) => {
     // Ensure file exists and passes MIME or extension checks
@@ -87,10 +84,7 @@ export default function UploadCard({ onResult, onClear }) {
       // Send the file as multipart/form-data to the API
       const form = new FormData()
       form.append('file', file)
-  if (subjectHint) form.append('subject', subjectHint)
-  if (gradeHint) form.append('grade', gradeHint)
-  if (tutorMode) form.append('tutorMode', '1')
-  if (targetLang) form.append('targetLang', targetLang)
+  // Removed subject, grade, tutorMode, and targetLang fields
       const res = await fetch('/api/uploadFile', { method: 'POST', body: form })
       let data
       const ct = res.headers.get('content-type') || ''
@@ -137,8 +131,8 @@ export default function UploadCard({ onResult, onClear }) {
   return (
     <div className="card p-5 flex flex-col gap-4">
       {/* Title and help text */}
-      <h2 className="font-semibold text-lg">Upload file</h2>
-      <p className="text-slate-600">PDF, Word, or image. Drop a file here or browse to select.</p>
+  <h2 className="font-semibold text-lg">Upload file</h2>
+  <p className="text-slate-600">PDF, Word, or image. Drop a file here or browse to select.</p>
 
       {/* Drag-and-drop area with click-to-browse fallback */}
       <div
@@ -170,23 +164,14 @@ export default function UploadCard({ onResult, onClear }) {
         />
       </div>
 
-      {/* Optional hints */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-        <input className="input" placeholder="Subject (optional)" value={subjectHint} onChange={(e)=>setSubjectHint(e.target.value)} />
-        <input className="input" placeholder="Grade (optional)" value={gradeHint} onChange={(e)=>setGradeHint(e.target.value)} />
-        <label className="flex items-center gap-2 text-sm">
-          <input type="checkbox" checked={tutorMode} onChange={(e)=>setTutorMode(e.target.checked)} />
-          Tutor mode (step-by-step, Socratic hints)
-        </label>
-        <input className="input" placeholder="Target language (e.g., fr, es)" value={targetLang} onChange={(e)=>setTargetLang(e.target.value)} />
-      </div>
+  {/* Removed Subject, Grade, Tutor mode, and Target language inputs */}
 
       {/* Submit and clear actions */}
-      <div className="flex gap-3">
-        <button className="btn" onClick={onSubmit} disabled={!file || loading}>
+      <div className="grid grid-cols-2 gap-3 items-center">
+        <button className="btn w-full whitespace-nowrap" onClick={onSubmit} disabled={!file || loading}>
           {loading ? 'Uploading…' : 'Submit'}
         </button>
-        <button className="btn bg-slate-500 hover:bg-slate-600" type="button" onClick={clear}>Clear</button>
+        <button className="btn bg-slate-500 hover:bg-slate-600 w-full whitespace-nowrap" type="button" onClick={clear}>Clear</button>
       </div>
 
       {showCrop && tempPreview && (
