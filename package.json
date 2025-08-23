@@ -9,5 +9,8 @@
   "start:api": "npm --prefix api run start",
   "start:api:alt": "npm --prefix api run start -- --port 7072",
     "build": "npm --prefix web run build"
+  },
+  "engines": {
+    "node": ">=20"
   }
 }
