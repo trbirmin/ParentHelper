@@ -44,6 +44,8 @@ jobs:
           app_location: web           # Frontend path
           api_location: api           # Functions API path
           output_location: dist       # Vite build output
+          app_build_command: npm ci && npm run build
+          api_build_command: npm ci
 
   close_pull_request_job:
     if: github.event_name == 'pull_request' && github.event.action == 'closed'
