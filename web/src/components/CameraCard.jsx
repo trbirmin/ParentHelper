@@ -1,11 +1,12 @@
 import React, { useEffect, useRef, useState } from 'react'
 
-export default function CameraCard({ onResult }) {
+export default function CameraCard({ onResult, onClear }) {
   const [file, setFile] = useState(null)
   const [previewUrl, setPreviewUrl] = useState('')
   const [loading, setLoading] = useState(false)
   const [streaming, setStreaming] = useState(false)
   const [cameraError, setCameraError] = useState(false)
+  // Removed subject, grade, target language, and tutor mode fields per request
   const videoRef = useRef(null)
   const canvasRef = useRef(null)
   const mediaStreamRef = useRef(null)
@@ -74,6 +75,12 @@ export default function CameraCard({ onResult }) {
     }
   }
 
+  const clear = () => {
+    setFile(null)
+  // no extra fields
+    onClear?.()
+  }
+
   const onSubmit = async (e) => {
     e.preventDefault()
     if (!file) return
@@ -81,6 +88,7 @@ export default function CameraCard({ onResult }) {
     try {
       const form = new FormData()
       form.append('image', file)
+  // no extra fields
       const res = await fetch('/api/processImage', { method: 'POST', body: form })
       const data = await res.json().catch(() => ({ error: 'Invalid JSON response' }))
       onResult?.(data)
@@ -93,12 +101,12 @@ export default function CameraCard({ onResult }) {
 
   return (
     <div className="card p-5 flex flex-col gap-4">
-      <h2 className="font-semibold text-lg">Take picture</h2>
+  <h2 className="font-semibold text-lg">Take picture</h2>
       <p className="text-slate-600">Use your camera to snap the homework. If camera access is blocked, please use the Upload file option.</p>
 
-      <div className="flex flex-col sm:flex-row gap-3">
-        <button className="btn text-lg py-3 w-full" onClick={startLive}>
-          {streaming ? 'Camera on' : 'Use live camera'}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 place-items-center">
+        <button className="btn text-lg py-3 px-5 whitespace-nowrap justify-self-center sm:col-span-2" onClick={startLive}>
+          {streaming ? 'Camera on' : 'Turn on camera'}
         </button>
       </div>
 
@@ -111,9 +119,9 @@ export default function CameraCard({ onResult }) {
       {streaming && (
         <div className="rounded-2xl border border-slate-200 overflow-hidden">
           <video ref={videoRef} className="w-full h-64 object-cover" playsInline muted />
-          <div className="p-3 flex gap-3">
-            <button className="btn" onClick={capture}>Capture</button>
-            <button className="btn bg-slate-500 hover:bg-slate-600" onClick={stopLive}>Stop camera</button>
+          <div className="p-3 grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <button className="btn w-full" onClick={capture}>Capture</button>
+            <button className="btn bg-slate-500 hover:bg-slate-600 w-full" onClick={stopLive}>Stop camera</button>
           </div>
           <canvas ref={canvasRef} className="hidden" />
         </div>
@@ -125,10 +133,15 @@ export default function CameraCard({ onResult }) {
         </div>
       )}
 
-      <div>
-        <button className="btn text-lg py-3 w-full" onClick={onSubmit} disabled={!file || loading}>
-          {loading ? 'Sending…' : 'Submit photo'}
+  {/* Optional hints removed */}
+
+      {/* Submission and reset controls */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 items-center">
+        <button className="btn text-lg py-3 w-full whitespace-nowrap" onClick={onSubmit} disabled={!file || loading}>
+          {loading ? 'Sending…' : 'Submit'}
         </button>
+        <button className="btn bg-slate-500 hover:bg-slate-600 w-full whitespace-nowrap" type="button" onClick={clear}>Clear</button>
+        <button className="btn bg-slate-700 hover:bg-slate-800 w-full whitespace-nowrap" type="button" onClick={startLive}>Retake</button>
       </div>
     </div>
   )
