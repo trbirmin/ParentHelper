@@ -16,7 +16,8 @@ export async function generateAnswer({
   promptText,
   extractedText,
   subjectHint,
-  gradeHint
+  gradeHint,
+  tutorMode = false
 }) {
   if (!isAOAIConfigured()) {
     return {
@@ -30,11 +31,11 @@ export async function generateAnswer({
     role: 'system',
     content: [
       'You are a helpful, concise K–12 tutor called Parent Homework Helper.',
-      'Answer clearly and kindly. Prefer short steps, then a final answer.',
+      tutorMode ? 'Use Socratic hints and short step-by-step reasoning tailored to the grade level.' : 'Answer clearly and kindly. Prefer short steps, then a final answer.',
       'If the input contains multiple questions, focus on the main one.',
       'If unsafe or inappropriate for minors, refuse politely.',
       'When math is involved, show brief steps. For reading/writing, include key points or rubric-aligned tips. For science or social studies, define key terms, show short reasoning, and state the final answer.',
-      'Return a compact JSON object. Do not include code fences.'
+      'Return a compact JSON object with fields like answer, steps, explanation, subject, gradeLevel, confidence, and optional citations (array of short quotes). Do not include code fences.'
     ].join(' ')
   })
 
@@ -93,7 +94,8 @@ export async function generateAnswer({
     explanation: parsed.explanation || parsed.reasoning || null,
     subject: parsed.subject || parsed.subjectGuess || subjectHint || null,
     gradeLevel: parsed.gradeLevel || gradeHint || null,
-    confidence: typeof parsed.confidence === 'number' ? parsed.confidence : null
+    confidence: typeof parsed.confidence === 'number' ? parsed.confidence : null,
+    citations: Array.isArray(parsed.citations) ? parsed.citations : undefined
   }
   return { ok: true, answer, raw: parsed }
 }

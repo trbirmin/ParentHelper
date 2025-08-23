@@ -1,12 +1,15 @@
 import React, { useEffect, useState } from 'react'
 import { createPortal } from 'react-dom'
+import { BlockMath, InlineMath } from 'react-katex'
 // Home: entry page showing three input cards (Upload, Camera, Question)
 // Displays results in a modal rendered via a React portal to avoid stacking/overflow issues
 import UploadCard from '@/components/UploadCard'
 import CameraCard from '@/components/CameraCard'
 import QuestionCard from '@/components/QuestionCard'
+import { useTranslation } from 'react-i18next'
 
 export default function Home() {
+  const { t } = useTranslation()
   const [result, setResult] = useState(null)
   const [loading, setLoading] = useState(false)
 
@@ -17,8 +20,8 @@ export default function Home() {
   return (
     <div className="space-y-8">
       <section className="text-center py-6">
-        <h1 className="text-3xl md:text-4xl font-bold mb-2">Help your child with homework, confidently</h1>
-        <p className="text-slate-600 max-w-3xl mx-auto">Upload a worksheet, snap a picture, or type a question. We’ll guide you with clear, parent-friendly explanations.</p>
+        <h1 className="text-3xl md:text-4xl font-bold mb-2">{t('title')}</h1>
+        <p className="text-slate-600 max-w-3xl mx-auto">{t('subtitle')}</p>
       </section>
 
       <section className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
@@ -50,6 +53,20 @@ function ResultModal({ result, onClose, asText }) {
   }, [onClose])
 
   const stop = (e) => e.stopPropagation()
+  const isMathy = (s='') => /[=^_]|\\frac|\\sqrt|\d\s*[+\-*×x÷\/]\s*\d/.test(String(s))
+  const [showSteps, setShowSteps] = useState(false)
+  const [bilingual, setBilingual] = useState(true)
+  const [speaking, setSpeaking] = useState(false)
+  const speak = (text) => {
+    if (!window.speechSynthesis) return
+    window.speechSynthesis.cancel()
+    if (!text) return
+    const u = new SpeechSynthesisUtterance(text)
+    u.onend = () => setSpeaking(false)
+    setSpeaking(true)
+    window.speechSynthesis.speak(u)
+  }
+  const stopSpeak = () => { if (window.speechSynthesis){ window.speechSynthesis.cancel(); setSpeaking(false) } }
   return createPortal(
     <div
       className="fixed inset-0 z-[9999] bg-black/50 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-6"
@@ -61,10 +78,22 @@ function ResultModal({ result, onClose, asText }) {
         className="w-full sm:max-w-3xl bg-white rounded-t-2xl sm:rounded-2xl shadow-xl"
         onClick={stop}
       >
-  {/* Modal header with close action */}
+  {/* Modal header with controls */}
   <div className="flex items-center justify-between p-4 border-b border-slate-200">
           <h3 className="font-semibold">Results</h3>
-          <button className="btn bg-slate-500 hover:bg-slate-600" onClick={onClose}>Close</button>
+          <div className="flex items-center gap-2">
+            <label className="text-xs flex items-center gap-1"><input type="checkbox" checked={showSteps} onChange={e=>setShowSteps(e.target.checked)} /> Show steps</label>
+            <label className="text-xs flex items-center gap-1"><input type="checkbox" checked={bilingual} onChange={e=>setBilingual(e.target.checked)} /> Bilingual</label>
+            {!speaking ? (
+              <button className="btn" onClick={()=>{
+                const text = Array.isArray(result?.items) ? result.items.map(it=>asText(it.answer||it.explanation)).join('. ') : asText(result.answer||result.explanation)
+                speak(text)
+              }}>Read aloud</button>
+            ) : (
+              <button className="btn bg-slate-500 hover:bg-slate-600" onClick={stopSpeak}>Stop</button>
+            )}
+            <button className="btn bg-slate-500 hover:bg-slate-600" onClick={onClose}>Close</button>
+          </div>
         </div>
   {/* Scrollable content area */}
   <div className="max-h-[75vh] overflow-auto p-4">
@@ -87,13 +116,17 @@ function ResultModal({ result, onClose, asText }) {
                     {ans && (
                       <div className="mt-2">
                         <div className="text-xs text-slate-500">Answer</div>
-                        <div className="text-emerald-700 font-semibold">{ans}</div>
+                        <div className="text-emerald-700 font-semibold">
+                          {isMathy(ans) ? <BlockMath math={ans} /> : ans}
+                        </div>
                       </div>
                     )}
                     {expl && (
                       <div className="mt-2">
                         <div className="text-xs text-slate-500">Explanation</div>
-                        <div className="text-slate-700 whitespace-pre-wrap">{expl}</div>
+                        <div className="text-slate-700 whitespace-pre-wrap">
+                          {isMathy(expl) ? <BlockMath math={expl} /> : expl}
+                        </div>
                       </div>
                     )}
                   </div>
@@ -107,22 +140,57 @@ function ResultModal({ result, onClose, asText }) {
                 const prob = asText(result.problem)
                 const ans = asText(result.answer)
                 const expl = asText(result.explanation)
+                const handwriting = result.handwriting ? true : false
+                const latex = asText(result.latex)
+                const steps = Array.isArray(result.steps) ? result.steps : []
+                const orig = asText(result.originalAnswer)
+                const trans = asText(result.translation)
+                const transLit = asText(result.translationTransliteration)
                 return (
                   <>
-                    {subj && (<div className="text-xs uppercase tracking-wide text-slate-500">{subj}</div>)}
+                    <div className="flex items-center gap-2 text-xs uppercase tracking-wide text-slate-500">
+                      {subj && <span>{subj}</span>}
+                      {handwriting && <span className="px-2 py-0.5 rounded-full bg-amber-100 text-amber-700">Handwriting</span>}
+                    </div>
                     {prob && <div className="font-medium">{prob}</div>}
-                    {ans && (
+                    <div className={bilingual ? 'grid md:grid-cols-2 gap-4' : ''}>
                       <div>
-                        <div className="text-xs text-slate-500">Answer</div>
-                        <div className="text-emerald-700 font-semibold">{ans}</div>
+                        {ans && (
+                          <div>
+                            <div className="text-xs text-slate-500">Answer</div>
+                            <div className="text-emerald-700 font-semibold">{isMathy(ans) ? <BlockMath math={ans} /> : ans}</div>
+                          </div>
+                        )}
+                        {latex && (
+                          <div className="mt-2">
+                            <div className="text-xs text-slate-500">LaTeX (table)</div>
+                            <div className="text-slate-700 whitespace-pre-wrap text-sm">{latex}</div>
+                          </div>
+                        )}
+                        {showSteps && steps.length > 0 && (
+                          <div className="mt-2">
+                            <div className="text-xs text-slate-500">Steps</div>
+                            <ul className="list-disc list-inside text-slate-700">
+                              {steps.map((s,i)=>(<li key={i}>{s}</li>))}
+                            </ul>
+                          </div>
+                        )}
+                        {expl && (
+                          <div>
+                            <div className="text-xs text-slate-500">Explanation</div>
+                            <div className="text-slate-700 whitespace-pre-wrap">{isMathy(expl) ? <BlockMath math={expl} /> : expl}</div>
+                          </div>
+                        )}
                       </div>
-                    )}
-                    {expl && (
-                      <div>
-                        <div className="text-xs text-slate-500">Explanation</div>
-                        <div className="text-slate-700 whitespace-pre-wrap">{expl}</div>
-                      </div>
-                    )}
+                      {bilingual && (trans || transLit) && (
+                        <div>
+                          <div className="text-xs text-slate-500">Translation</div>
+                          {trans && <div className="font-semibold">{trans}</div>}
+                          {transLit && <div className="text-slate-600 text-sm">{transLit}</div>}
+                          {orig && <div className="text-slate-500 text-xs mt-1">Original: {orig}</div>}
+                        </div>
+                      )}
+                    </div>
                     {(!ans && !expl) && (
                       <div className="text-slate-500 text-sm">No answer detected.</div>
                     )}

@@ -9,7 +9,8 @@
   },
   "dependencies": {
     "@azure/ai-form-recognizer": "^4.0.0",
-  "@azure/functions": "^4.4.0"
+    "@azure/functions": "^4.4.0",
+    "parent-homework-helper": "file:.."
   },
   "devDependencies": {
     "azure-functions-core-tools": "^4.0.5611"

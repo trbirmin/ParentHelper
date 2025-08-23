@@ -1,4 +1,5 @@
-// Simple fallback definitions for common K–12 math terms when AI is not configured
+// Fallback definitions: quick glossary for common K–12 math/science terms
+// Used when Azure OpenAI is not configured or doesn't yield an answer.
 
 function normalize(s = '') {
   return String(s).toLowerCase().replace(/\s+/g, ' ').trim()

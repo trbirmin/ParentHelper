@@ -22,3 +22,51 @@ body {
 .btn {
   @apply inline-flex items-center justify-center rounded-xl bg-brand-500 text-white px-4 py-2 font-medium hover:bg-brand-600 transition-colors;
 }
+
+/* Text input utility */
+.input {
+  @apply w-full rounded-xl border border-slate-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-brand-300;
+}
+
+/* Dark mode and high contrast support via data attributes on <html> */
+html[data-theme="dark"] body {
+  @apply bg-slate-900 text-slate-100;
+}
+html[data-theme="dark"] .card {
+  @apply bg-slate-800 border-slate-700;
+}
+html[data-theme="dark"] .btn {
+  @apply bg-brand-400 hover:bg-brand-500 text-slate-900;
+}
+html[data-theme="dark"] .input {
+  @apply bg-slate-800 border-slate-600 text-slate-100;
+}
+
+html[data-contrast="high"] body {
+  @apply bg-white text-black;
+}
+html[data-contrast="high"] .card {
+  @apply bg-white border-black;
+}
+html[data-contrast="high"] .btn {
+  @apply bg-black text-white hover:bg-black;
+}
+html[data-contrast="high"] .input {
+  @apply border-black;
+}
+
+/* Dyslexic-friendly font toggle */
+@font-face {
+  font-family: 'OpenDyslexic';
+  src: local('OpenDyslexic');
+  font-display: swap;
+}
+html[data-font="dyslexic"] body {
+  font-family: 'OpenDyslexic', ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+}
+
+/* Better focus visibility */
+*:focus-visible {
+  outline: 3px solid #4ea6ff;
+  outline-offset: 2px;
+}

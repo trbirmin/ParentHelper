@@ -7,7 +7,7 @@ import { solveFromText } from "./mathSolver.js";
 import { getDefinition } from "./fallbackDefinitions.js";
 import { getTimeAnswer } from "./fallbackTime.js";
 import { generateAnswer, isAOAIConfigured } from "./aiAnswer.js";
-import { translateText, isTranslatorConfigured } from "./translator.js";
+import { translateText, isTranslatorConfigured, translateWithDetect } from "./translator.js";
 
 app.http('processImage', {
   methods: ['POST'],
@@ -17,12 +17,14 @@ app.http('processImage', {
     try {
       const contentType = request.headers.get('content-type') || ''
       let file
-      let subjectHint, gradeHint
+      let subjectHint, gradeHint, tutorMode, reqTargetLang
       if (contentType.includes('multipart/form-data')) {
         const formData = await request.formData()
         file = formData.get('image') || formData.get('file')
         subjectHint = formData.get('subject') || undefined
         gradeHint = formData.get('grade') || undefined
+        tutorMode = formData.get('tutorMode') ? true : false
+        reqTargetLang = formData.get('targetLang') || undefined
       } else {
         const body = await request.json().catch(() => ({}))
         if (body?.base64) {
@@ -31,6 +33,8 @@ app.http('processImage', {
         }
         subjectHint = body?.subject
         gradeHint = body?.grade
+        tutorMode = body?.tutorMode ? true : false
+        reqTargetLang = body?.targetLang
       }
 
       if (!file) return { status: 400, jsonBody: { error: 'No image provided' } }
@@ -48,8 +52,9 @@ app.http('processImage', {
       const buffer = Buffer.from(await file.arrayBuffer())
       const client = new DocumentAnalysisClient(endpoint, new AzureKeyCredential(key))
       const poller = await client.beginAnalyzeDocument('prebuilt-document', buffer, { contentType: detectedType })
-      const result = await poller.pollUntilDone()
+  const result = await poller.pollUntilDone()
       const fullText = result.content || ''
+  const hasHandwriting = Array.isArray(result.styles) ? result.styles.some(s => s.isHandwritten) : false
 
       // Use the same question extraction strategy as uploadFile by importing heuristics locally
       const normalizeSpace = (s='') => String(s).replace(/\s+/g, ' ').trim()
@@ -108,13 +113,14 @@ app.http('processImage', {
         }
         let ai = null
         if (isAOAIConfigured()) {
-          ai = await generateAnswer({ promptText: problemLine, extractedText: undefined, subjectHint, gradeHint })
+          ai = await generateAnswer({ promptText: problemLine, extractedText: undefined, subjectHint, gradeHint, tutorMode })
         }
-        const exprOnly = findExpression(problemLine)
-        const mathTry = solveFromText(exprOnly || problemLine)
-        let subj = subjectHint || (ai?.ok && (ai.answer.subject || null)) || (mathTry.success ? 'math' : null)
-        let ans = (ai?.ok && (ai.answer.answer ?? null)) || (mathTry.success ? String(mathTry.result) : null)
-        let expl = (ai?.ok && (ai.answer.explanation || (Array.isArray(ai.answer.steps) ? ai.answer.steps.join(' -> ') : null))) || (mathTry.success ? mathTry.steps.join(' | ') : null)
+  const exprOnly = findExpression(problemLine)
+  const mathTry = solveFromText(exprOnly || problemLine)
+  let subj = subjectHint || (ai?.ok && (ai.answer.subject || null)) || (mathTry.success ? 'math' : null)
+  let ans = (ai?.ok && (ai.answer.answer ?? null)) || (mathTry.success ? String(mathTry.result) : null)
+  let steps = (ai?.ok && Array.isArray(ai.answer.steps) ? ai.answer.steps : []) || (mathTry.success ? mathTry.steps : [])
+  let expl = (ai?.ok && (ai.answer.explanation || (steps.length ? steps.join(' -> ') : null))) || (mathTry.success ? mathTry.steps.join(' | ') : null)
         if (!ans && !expl) {
           const def = getDefinition(problemLine)
           if (def.ok) {
@@ -131,20 +137,31 @@ app.http('processImage', {
             }
           }
         }
-        if (targetLang && (ans || expl) && isTranslatorConfigured()) {
+        const originalAnswer = ans || null
+        let translation = null
+        let translationTransliteration = null
+        let translationDetectedLang = null
+        let translationConfidence = null
+        const finalTarget = reqTargetLang || targetLang
+        if (finalTarget && (ans || expl) && isTranslatorConfigured()) {
           try {
             const base = ans || expl || ''
-            const tx = await translateText({ text: base, to: targetLang })
+            const tx = await translateWithDetect({ text: base, to: finalTarget })
             if (tx.ok && tx.translated) {
               if (ans) {
-                expl = expl ? `${expl}\n\n(${ans} in ${targetLang})` : `(${ans} in ${targetLang})`
+                const extra = tx.transliteration ? `${ans} (${tx.transliteration})` : ans
+                expl = expl ? `${expl}\n\n(${extra} in ${finalTarget})` : `(${extra} in ${finalTarget})`
               }
-              ans = tx.translated
+              translation = tx.translated
+              translationTransliteration = tx.transliteration || null
+              translationDetectedLang = tx.detected || null
+              translationConfidence = tx.confidence || null
               subj = subj || 'translation'
             }
           } catch {}
         }
-        return { subject: subj, problem: problemLine, answer: ans, explanation: expl }
+  // No table build here (single image); propagate handwriting flag
+  return { subject: subj, problem: problemLine, answer: ans, explanation: expl, steps, originalAnswer, translation, translationTransliteration, translationDetectedLang, translationConfidence, handwriting: hasHandwriting }
       }
 
       if (picked.length > 1) {

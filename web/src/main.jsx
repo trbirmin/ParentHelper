@@ -9,6 +9,8 @@ import App from './App'
 import Home from './pages/Home'
 import About from './pages/About'
 import Contact from './pages/Contact'
+import 'katex/dist/katex.min.css'
+import './i18n'
 
 // Mount the React app and configure client-side routing
 createRoot(document.getElementById('root')).render(

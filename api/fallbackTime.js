@@ -1,4 +1,5 @@
-// Fallback time answer for questions like "what time is it in Orlando?"
+// Fallback time: parses "what time is it in <city>?" and returns local time using Intl.DateTimeFormat
+// Limited city -> timezone map; not a full geocoding service. Intended as a graceful offline-ish answer.
 
 function norm(s = '') { return String(s).toLowerCase().trim() }
 

@@ -8,7 +8,7 @@ import { solveFromText } from "./mathSolver.js";
 import { getDefinition } from "./fallbackDefinitions.js";
 import { getTimeAnswer } from "./fallbackTime.js";
 import { generateAnswer, isAOAIConfigured } from "./aiAnswer.js";
-import { translateText, isTranslatorConfigured } from "./translator.js";
+import { translateText, isTranslatorConfigured, translateWithDetect } from "./translator.js";
 
 const endpoint = process.env.AZURE_DOCINTEL_ENDPOINT
 const key = process.env.AZURE_DOCINTEL_KEY
@@ -27,7 +27,9 @@ app.http('uploadFile', {
         // Optional hints from the client
         var subjectHint = formData.get('subject') || undefined
         var gradeHint = formData.get('grade') || undefined
-        var maxItems = parseInt(formData.get('maxItems') || '20', 10)
+  var maxItems = parseInt(formData.get('maxItems') || '20', 10)
+  var tutorMode = formData.get('tutorMode') ? true : false
+  var reqTargetLang = formData.get('targetLang') || undefined
       } else {
         // Allow JSON with { base64, filename }
         const body = await request.json().catch(() => ({}))
@@ -37,7 +39,9 @@ app.http('uploadFile', {
         }
         var subjectHint = body?.subject || undefined
         var gradeHint = body?.grade || undefined
-        var maxItems = parseInt((body && body.maxItems) ? String(body.maxItems) : '20', 10)
+  var maxItems = parseInt((body && body.maxItems) ? String(body.maxItems) : '20', 10)
+  var tutorMode = body?.tutorMode ? true : false
+  var reqTargetLang = body?.targetLang
       }
 
       if (!file) {
@@ -110,6 +114,8 @@ app.http('uploadFile', {
         columnCount: t.columnCount,
         cells: t.cells?.map(c => ({ rowIndex: c.rowIndex, columnIndex: c.columnIndex, content: c.content }))
       }))
+      // Handwriting styles presence for metadata
+      const hasHandwriting = Array.isArray(result.styles) ? result.styles.some(s => s.isHandwritten) : false
 
   // Quick math probe against the whole text (basic arithmetic only)
       const fullText = result.content || ''
@@ -122,7 +128,8 @@ app.http('uploadFile', {
           promptText: undefined,
           extractedText: fullText,
           subjectHint,
-          gradeHint
+          gradeHint,
+          tutorMode
         })
       }
 
@@ -385,13 +392,15 @@ app.http('uploadFile', {
             promptText: problemLine,
             extractedText: undefined,
             subjectHint,
-            gradeHint
+            gradeHint,
+            tutorMode
           })
         }
-        const mathTry = solveFromText(exprOnly || problemLine)
-        let subj = subjectHint || (aiItem?.ok && (aiItem.answer.subject || null)) || (mathTry.success ? 'math' : null)
-        let ans = (aiItem?.ok && (aiItem.answer.answer ?? null)) || (mathTry.success ? String(mathTry.result) : null)
-        let expl = (aiItem?.ok && (aiItem.answer.explanation || (Array.isArray(aiItem.answer.steps) ? aiItem.answer.steps.join(' -> ') : null))) || (mathTry.success ? mathTry.steps.join(' | ') : null)
+  const mathTry = solveFromText(exprOnly || problemLine)
+  let subj = subjectHint || (aiItem?.ok && (aiItem.answer.subject || null)) || (mathTry.success ? 'math' : null)
+  let ans = (aiItem?.ok && (aiItem.answer.answer ?? null)) || (mathTry.success ? String(mathTry.result) : null)
+  let steps = (aiItem?.ok && Array.isArray(aiItem.answer.steps) ? aiItem.answer.steps : []) || (mathTry.success ? mathTry.steps : [])
+  let expl = (aiItem?.ok && (aiItem.answer.explanation || (steps.length ? steps.join(' -> ') : null))) || (mathTry.success ? mathTry.steps.join(' | ') : null)
         if (!ans && !expl) {
           const def = getDefinition(problemLine)
           if (def.ok) {
@@ -408,20 +417,41 @@ app.http('uploadFile', {
             }
           }
         }
-        if (targetLang && (ans || expl) && isTranslatorConfigured()) {
+        const originalAnswer = ans || null
+        let translation = null
+        let translationTransliteration = null
+        let translationDetectedLang = null
+        let translationConfidence = null
+        const finalTarget = reqTargetLang || targetLang
+        if (finalTarget && (ans || expl) && isTranslatorConfigured()) {
           try {
             const base = ans || expl || ''
-            const tx = await translateText({ text: base, to: targetLang })
+            const tx = await translateWithDetect({ text: base, to: finalTarget })
             if (tx.ok && tx.translated) {
               if (ans) {
-                expl = expl ? `${expl}\n\n(${ans} in ${targetLang})` : `(${ans} in ${targetLang})`
+                const extra = tx.transliteration ? `${ans} (${tx.transliteration})` : ans
+                expl = expl ? `${expl}\n\n(${extra} in ${finalTarget})` : `(${extra} in ${finalTarget})`
               }
-              ans = tx.translated
+              translation = tx.translated
+              translationTransliteration = tx.transliteration || null
+              translationDetectedLang = tx.detected || null
+              translationConfidence = tx.confidence || null
               subj = subj || 'translation'
             }
           } catch {}
         }
-        return { subject: subj, problem: problemLine, answer: ans, explanation: expl }
+        // Optionally include LaTeX for any single small table in this page batch
+        let latex = null
+        if (Array.isArray(tables) && tables.length === 1 && tables[0].rowCount <= 8 && tables[0].columnCount <= 8) {
+          const t0 = tables[0]
+          const grid = Array.from({ length: t0.rowCount }, () => Array(t0.columnCount).fill(''))
+          for (const c of (t0.cells||[])) { grid[c.rowIndex][c.columnIndex] = (c.content||'').replace(/\|/g,'\\|') }
+          const header = `\\begin{tabular}{${'c'.repeat(t0.columnCount)}}\n\\hline\n`
+          const body = grid.map(r => r.join(' & ') + ' \\').join('\n')
+          const footer = '\n\\hline\n\\end{tabular}'
+          latex = header + body + footer
+        }
+        return { subject: subj, problem: problemLine, answer: ans, explanation: expl, steps, originalAnswer, translation, translationTransliteration, translationDetectedLang, translationConfidence, handwriting: hasHandwriting, latex }
       }
 
   if (questions.length > 1) {

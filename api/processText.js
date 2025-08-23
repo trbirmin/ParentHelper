@@ -6,17 +6,20 @@ import { solveFromText } from "./mathSolver.js";
 import { getDefinition } from "./fallbackDefinitions.js";
 import { generateAnswer, isAOAIConfigured } from "./aiAnswer.js";
 import { getTimeAnswer } from "./fallbackTime.js";
-import { translateText, isTranslatorConfigured } from "./translator.js";
+import { translateText, isTranslatorConfigured, translateWithDetect } from "./translator.js";
+import { analyzeELA } from "./fallbackELA.js";
 
 app.http('processText', {
   methods: ['POST'],
   authLevel: 'anonymous',
   route: 'processText',
   handler: async (request, context) => {
-    const body = await request.json().catch(() => ({}));
+  const body = await request.json().catch(() => ({}));
     const question = body?.question || 'No question provided';
     const subjectHint = body?.subject
     const gradeHint = body?.grade
+  const tutorMode = body?.tutorMode ? true : false
+  const reqTargetLang = body?.targetLang
     const solution = solveFromText(question)
 
     const splitQuestions = (text) => {
@@ -87,19 +90,21 @@ app.http('processText', {
         if (mIn && langMap[mIn[1]]) targetLang = langMap[mIn[1]]
       }
 
-      let ai = null
+    let ai = null
       if (isAOAIConfigured()) {
         ai = await generateAnswer({
           promptText: qLine,
           extractedText: undefined,
-          subjectHint,
-          gradeHint
+      subjectHint,
+      gradeHint,
+      tutorMode
         })
       }
       const mathTry = solveFromText(qLine)
       let subj = subjectHint || (ai?.ok && (ai.answer.subject || null)) || (mathTry.success ? 'math' : null)
       let ans = (ai?.ok && (ai.answer.answer ?? null)) || (mathTry.success ? String(mathTry.result) : null)
-      let expl = (ai?.ok && (ai.answer.explanation || (Array.isArray(ai.answer.steps) ? ai.answer.steps.join(' -> ') : null))) || (mathTry.success ? mathTry.steps.join(' | ') : null)
+      let steps = (ai?.ok && Array.isArray(ai.answer.steps) ? ai.answer.steps : []) || (mathTry.success ? mathTry.steps : [])
+      let expl = (ai?.ok && (ai.answer.explanation || (steps.length ? steps.join(' -> ') : null))) || (mathTry.success ? mathTry.steps.join(' | ') : null)
       if (!ans && !expl) {
         const def = getDefinition(qLine)
         if (def.ok) {
@@ -117,22 +122,43 @@ app.http('processText', {
         }
       }
 
+      // If no general answer, attempt ELA helpers on prose
+      if (!ans && !expl && /[a-zA-Z]/.test(qLine)) {
+        const ela = analyzeELA(qLine)
+        if (ela.ok) {
+          subj = subj || ela.subject
+          ans = `Estimated reading level: grade ${ela.readingLevel}`
+          const vocabStr = ela.vocab.length ? `Key vocabulary: ${ela.vocab.map(v=>v.word).join(', ')}` : ''
+          const sugStr = ela.suggestions.length ? `Suggestions: ${ela.suggestions.join(' ')}` : ''
+          expl = [vocabStr, sugStr].filter(Boolean).join('\n')
+        }
+      }
+
+      const originalAnswer = ans || null
+      let translation = null
+      let translationTransliteration = null
+      let translationDetectedLang = null
+      let translationConfidence = null
       // If a target language is present and Translator is configured, translate the final answer
-      if (targetLang && (ans || expl) && isTranslatorConfigured()) {
+      const finalTarget = reqTargetLang || targetLang
+      if (finalTarget && (ans || expl) && isTranslatorConfigured()) {
         try {
           const base = ans || expl || ''
-          const tx = await translateText({ text: base, to: targetLang })
+          const tx = await translateWithDetect({ text: base, to: finalTarget })
           if (tx.ok && tx.translated) {
-            // Keep original in explanation and put translation as the answer
             if (ans) {
-              expl = expl ? `${expl}\n\n(${ans} in ${targetLang})` : `(${ans} in ${targetLang})`
+              const extra = tx.transliteration ? `${ans} (${tx.transliteration})` : ans
+              expl = expl ? `${expl}\n\n(${extra} in ${finalTarget})` : `(${extra} in ${finalTarget})`
             }
-            ans = tx.translated
+            translation = tx.translated
+            translationTransliteration = tx.transliteration || null
+            translationDetectedLang = tx.detected || null
+            translationConfidence = tx.confidence || null
             subj = subj || 'translation'
           }
         } catch {}
       }
-      return { subject: subj, problem: qLine, answer: ans, explanation: expl }
+      return { subject: subj, problem: qLine, answer: ans, explanation: expl, steps, originalAnswer, translation, translationTransliteration, translationDetectedLang, translationConfidence }
     }
 
     if (items.length > 1) {

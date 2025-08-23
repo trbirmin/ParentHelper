@@ -2,3 +2,4 @@
 import './uploadFile.js'
 import './processImage.js'
 import './processText.js'
+import './speechToken.js'

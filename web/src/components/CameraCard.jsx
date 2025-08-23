@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react'
+import CropModal from './CropModal'
 
 // CameraCard
 // - Lets users take a photo with the device camera or submit a previously captured preview
@@ -20,6 +21,12 @@ export default function CameraCard({ onResult, onClear }) {
   const videoRef = useRef(null)
   const canvasRef = useRef(null)
   const mediaStreamRef = useRef(null)
+  const [showCrop, setShowCrop] = useState(false)
+  const [tempPreview, setTempPreview] = useState('')
+  const [tutorMode, setTutorMode] = useState(false)
+  const [subjectHint, setSubjectHint] = useState('')
+  const [gradeHint, setGradeHint] = useState('')
+  const [targetLang, setTargetLang] = useState('')
 
   useEffect(() => {
     // When a new file is set, create a blob URL for the preview
@@ -87,9 +94,11 @@ export default function CameraCard({ onResult, onClear }) {
     ctx.drawImage(video, 0, 0, canvas.width, canvas.height)
     const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/jpeg', 0.9))
     if (blob) {
-      const capturedFile = new File([blob], 'camera.jpg', { type: 'image/jpeg' })
-      setFile(capturedFile)
-      stopLive()
+  // Open crop modal first
+  const url = URL.createObjectURL(blob)
+  setTempPreview(url)
+  setShowCrop(true)
+  stopLive()
     }
   }
 
@@ -101,6 +110,10 @@ export default function CameraCard({ onResult, onClear }) {
       // Send the captured/selected file to the API as `image`
       const form = new FormData()
       form.append('image', file)
+  if (subjectHint) form.append('subject', subjectHint)
+  if (gradeHint) form.append('grade', gradeHint)
+  if (tutorMode) form.append('tutorMode', '1')
+  if (targetLang) form.append('targetLang', targetLang)
       const res = await fetch('/api/processImage', { method: 'POST', body: form })
       const data = await res.json().catch(() => ({ error: 'Invalid JSON response' }))
       onResult?.(data)
@@ -117,6 +130,22 @@ export default function CameraCard({ onResult, onClear }) {
     setFile(null)
     setPreviewUrl('')
     onClear?.()
+  }
+
+  const onCropCancel = () => {
+    setShowCrop(false)
+    if (tempPreview) URL.revokeObjectURL(tempPreview)
+    setTempPreview('')
+  }
+
+  const onCropDone = async (blob) => {
+    setShowCrop(false)
+    if (tempPreview) URL.revokeObjectURL(tempPreview)
+    setTempPreview('')
+    if (blob) {
+      const capturedFile = new File([blob], 'camera.jpg', { type: 'image/jpeg' })
+      setFile(capturedFile)
+    }
   }
 
   return (
@@ -158,6 +187,17 @@ export default function CameraCard({ onResult, onClear }) {
         </div>
       )}
 
+      {/* Optional hints */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <input className="input" placeholder="Subject (optional)" value={subjectHint} onChange={(e)=>setSubjectHint(e.target.value)} />
+        <input className="input" placeholder="Grade (optional)" value={gradeHint} onChange={(e)=>setGradeHint(e.target.value)} />
+        <label className="flex items-center gap-2 text-sm">
+          <input type="checkbox" checked={tutorMode} onChange={(e)=>setTutorMode(e.target.checked)} />
+          Tutor mode (step-by-step, Socratic hints)
+        </label>
+        <input className="input" placeholder="Target language (e.g., fr, es)" value={targetLang} onChange={(e)=>setTargetLang(e.target.value)} />
+      </div>
+
       {/* Submission and reset controls */}
       <div className="flex gap-3">
         <button className="btn text-lg py-3 w-full" onClick={onSubmit} disabled={!file || loading}>
@@ -166,6 +206,10 @@ export default function CameraCard({ onResult, onClear }) {
         <button className="btn bg-slate-500 hover:bg-slate-600 w-full" type="button" onClick={clear}>Clear</button>
         <button className="btn bg-slate-700 hover:bg-slate-800 w-full" type="button" onClick={startLive}>Retake</button>
       </div>
+
+      {showCrop && tempPreview && (
+        <CropModal src={tempPreview} onCancel={onCropCancel} onCropped={onCropDone} />
+      )}
     </div>
   )
 }
