@@ -12,28 +12,15 @@ app.http('uploadFile', {
     try {
       const contentType = request.headers.get('content-type') || ''
       let file
-      let options = {}
       if (contentType.includes('multipart/form-data')) {
         const formData = await request.formData()
         file = formData.get('file') || formData.get('image')
-        options = {
-          tutorMode: !!formData.get('tutorMode'),
-          subject: formData.get('subject') || undefined,
-          grade: formData.get('grade') || undefined,
-          targetLang: formData.get('targetLang') || undefined
-        }
       } else {
         // Allow JSON with { base64, filename }
         const body = await request.json().catch(() => ({}))
         if (body?.base64) {
           const bytes = Buffer.from(body.base64, 'base64')
           file = new File([bytes], body.filename || 'upload.bin', { type: body.contentType || 'application/octet-stream' })
-        }
-        options = {
-          tutorMode: !!body?.tutorMode,
-          subject: body?.subject || undefined,
-          grade: body?.grade || undefined,
-          targetLang: body?.targetLang || undefined
         }
       }
 
@@ -113,7 +100,6 @@ app.http('uploadFile', {
           action: 'uploadFile',
           status: 'ok',
           file: { name: file.name, type: file.type, size: file.size },
-          options,
           document: {
             content: result.content || '',
             pages,

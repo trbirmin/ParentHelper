@@ -2,11 +2,12 @@ name: Azure Static Web Apps CI/CD
 
 on:
   push:
-    branches: [ main ]
+    branches:
+      - main
   pull_request:
-    types: [ opened, synchronize, reopened, closed ]
-    branches: [ main ]
-  workflow_dispatch:
+    types: [opened, synchronize, reopened, closed]
+    branches:
+      - main
 
 jobs:
   build_and_deploy_job:
@@ -14,67 +15,36 @@ jobs:
     runs-on: ubuntu-latest
     name: Build and Deploy Job
     permissions:
-      contents: read
-      id-token: write
+       id-token: write
+       contents: read
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v3
         with:
-          submodules: false
+          submodules: true
           lfs: false
-
-      - name: Use Node.js 20 for builds
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20
-
-      - name: Show config
-        run: |
-          echo "app_location=web"
-          echo "api_location=api"
-          echo "output_location=dist"
-
-      - name: Install and build web (Vite)
-        run: |
-          npm ci --prefix web
-          npm run build --prefix web
-
-      - name: Install API dependencies (Functions)
-        run: |
-          npm ci --prefix api
-
-      - name: Get GitHub OIDC Id Token
-        uses: actions/github-script@v7
+      - name: Install OIDC Client from Core Package
+        run: npm install @actions/core@1.6.0 @actions/http-client
+      - name: Get Id Token
+        uses: actions/github-script@v6
         id: idtoken
         with:
-          script: |
-            return await core.getIDToken();
-          result-encoding: string
-
-      - name: Validate deployment authentication inputs
-        run: |
-          TOKEN_PRESENT="${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN_MANGO_TREE_037767310 != '' }}"
-          OIDC_PRESENT="${{ steps.idtoken.outputs.result != '' }}"
-          echo "Token present: $TOKEN_PRESENT"
-          echo "OIDC present: $OIDC_PRESENT"
-          if [ "$TOKEN_PRESENT" = "false" ] && [ "$OIDC_PRESENT" = "false" ]; then
-            echo "No deployment token secret or OIDC id-token available. Configure one of them and re-run." >&2
-            exit 1
-          fi
-
-      - name: Build and Deploy
+           script: |
+               const coredemo = require('@actions/core')
+               return await coredemo.getIDToken()
+           result-encoding: string
+      - name: Build And Deploy
         id: builddeploy
         uses: Azure/static-web-apps-deploy@v1
         with:
           azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN_MANGO_TREE_037767310 }}
-          action: upload
-          # See https://aka.ms/swaworkflowconfig
-          app_location: web/dist      # Prebuilt frontend output
-          api_location: api           # Functions API path (node_modules already installed)
-          output_location: ''         # Skip app build: files already in app_location
-          skip_app_build: true
-          skip_api_build: true
-          production_branch: main
+          action: "upload"
+          ###### Repository/Build Configurations - These values can be configured to match your app requirements. ######
+          # For more information regarding Static Web App workflow configurations, please visit: https://aka.ms/swaworkflowconfig
+          app_location: "/web" # App source code path
+          api_location: "api" # Api source code path - optional
+          output_location: "dist" # Built app content directory - optional
           github_id_token: ${{ steps.idtoken.outputs.result }}
+          ###### End of Repository/Build Configurations ######
 
   close_pull_request_job:
     if: github.event_name == 'pull_request' && github.event.action == 'closed'
@@ -85,5 +55,4 @@ jobs:
         id: closepullrequest
         uses: Azure/static-web-apps-deploy@v1
         with:
-          azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN_MANGO_TREE_037767310 }}
-          action: close
+          action: "close"

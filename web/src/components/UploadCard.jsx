@@ -11,11 +11,10 @@ const acceptAttr = [
   '.pdf', '.doc', '.docx', '.png', '.jpg', '.jpeg', '.gif'
 ].join(',')
 
-export default function UploadCard({ onResult, onClear }) {
+export default function UploadCard({ onResult }) {
   const [file, setFile] = useState(null)
   const [dragOver, setDragOver] = useState(false)
   const [loading, setLoading] = useState(false)
-  // Removed subject, grade, target language, and tutor mode fields per request
   const inputRef = useRef(null)
 
   const validate = (f) => {
@@ -56,7 +55,6 @@ export default function UploadCard({ onResult, onClear }) {
     try {
       const form = new FormData()
       form.append('file', file)
-  // no extra fields
       const res = await fetch('/api/uploadFile', { method: 'POST', body: form })
       const data = await res.json().catch(() => ({ error: 'Invalid JSON response' }))
       onResult?.(data)
@@ -65,13 +63,6 @@ export default function UploadCard({ onResult, onClear }) {
     } finally {
       setLoading(false)
     }
-  }
-
-  const clear = () => {
-    setFile(null)
-  // no extra fields
-    if (inputRef.current) inputRef.current.value = ''
-    onClear?.()
   }
 
   return (
@@ -107,14 +98,10 @@ export default function UploadCard({ onResult, onClear }) {
         />
       </div>
 
-  {/* Optional hints removed */}
-
-      {/* Submit and clear actions */}
-      <div className="grid grid-cols-2 gap-3 items-center">
-        <button className="btn w-full whitespace-nowrap" onClick={onSubmit} disabled={!file || loading}>
+      <div>
+        <button className="btn" onClick={onSubmit} disabled={!file || loading}>
           {loading ? 'Uploading…' : 'Submit'}
         </button>
-        <button className="btn bg-slate-500 hover:bg-slate-600 w-full whitespace-nowrap" type="button" onClick={clear}>Clear</button>
       </div>
     </div>
   )
