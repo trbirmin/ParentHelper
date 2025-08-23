@@ -1,33 +1,3 @@
-# Parent Helper – Deploying to Azure Static Web Apps
-
-This repo is set up to deploy a Vite React frontend (`web/`) and an Azure Functions backend (`api/`) to Azure Static Web Apps using GitHub Actions.
-
-## Build configuration
-- app_location: `web`
-- output_location: `dist`
-- api_location: `api`
-
-## Required configuration (in Azure portal → Static Web App → Configuration)
-- `AZURE_OPENAI_ENDPOINT`
-- `AZURE_OPENAI_KEY`
-- `AZURE_OPENAI_DEPLOYMENT`
-- `AZURE_OPENAI_API_VERSION` (e.g., `2024-06-01`)
-- `AZURE_DOCINTEL_ENDPOINT`
-- `AZURE_DOCINTEL_KEY`
- - `AZURE_TRANSLATOR_KEY` (for translation)
- - `AZURE_TRANSLATOR_REGION` (required if using multi-service Cognitive resource)
- - `AZURE_TRANSLATOR_ENDPOINT` (optional; defaults to `https://api.cognitive.microsofttranslator.com`)
-
-## How to deploy
-1. Create a Static Web App resource in Azure and connect this GitHub repo to it.
-2. Add a repository secret `AZURE_STATIC_WEB_APPS_API_TOKEN` (or let the portal create it automatically).
-3. Push to `main`. The workflow `.github/workflows/azure-static-web-apps.yml` will build and deploy.
-
-## Local development
-```powershell
-npm --prefix .\web run dev
-npm --prefix .\api start
-```
 # Parent Homework Helper (Azure Static Web Apps + Azure Functions)
 
 Monorepo scaffold with a React + Tailwind frontend and an Azure Functions backend. Backend endpoints return mock JSON so you can test structure before wiring Azure AI services.

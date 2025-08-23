@@ -1,6 +1,4 @@
-// Function host entry: import each HTTP function so the v4 Azure Functions host can discover and register them
+// Import all functions so the Azure Functions host discovers them (v4 model)
 import './uploadFile.js'
 import './processImage.js'
 import './processText.js'
-import './speechToken.js'
-import './translateApi.js'
