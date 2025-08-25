@@ -102,8 +102,11 @@ export default function QuestionCard({ onResult, onClear }) {
   }
 
   return (
-    <div className="card p-5 flex flex-col gap-4">
-  <h2 className="font-semibold text-lg">Type or speak a question</h2>
+    <div className="card p-5 flex flex-col gap-4 transition-shadow hover:shadow-md">
+  <h2 className="font-semibold text-lg flex items-center gap-2">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5 text-brand-600"><path d="M12 3a9 9 0 100 18 9 9 0 000-18zm1 13h-2v-2h2v2zm.07-7.75l-.9.92A2.5 2.5 0 0011 11h2v-.25c0-.46.18-.9.51-1.23l1.2-1.2a2.75 2.75 0 10-3.89-3.89l-1.2 1.2 1.41 1.41 1.2-1.2a.75.75 0 111.06 1.06z"/></svg>
+        Type or speak a question
+      </h2>
       <form onSubmit={submit} className="flex flex-col gap-3">
         <textarea
           value={q}
@@ -138,7 +141,10 @@ export default function QuestionCard({ onResult, onClear }) {
         )}
   {/* Removed Subject, Grade, Tutor mode, and Target language inputs */}
         <div className="grid grid-cols-2 gap-3 items-center">
-          <button type="submit" className="btn text-lg py-3 w-full whitespace-nowrap" disabled={!canSubmit}>
+          <button type="submit" className="btn text-lg py-3 w-full whitespace-nowrap disabled:opacity-60 relative" disabled={!canSubmit}>
+            {loading && (
+              <span className="absolute left-3 inline-block h-4 w-4 animate-spin rounded-full border-2 border-slate-300 border-t-transparent" aria-hidden />
+            )}
             {loading ? 'Submitting…' : 'Submit'}
           </button>
           <button type="button" className="btn bg-slate-500 hover:bg-slate-600 w-full whitespace-nowrap" onClick={clear}>Clear</button>

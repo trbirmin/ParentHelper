@@ -129,9 +129,12 @@ export default function UploadCard({ onResult, onClear }) {
   }
 
   return (
-    <div className="card p-5 flex flex-col gap-4">
+    <div className="card p-5 flex flex-col gap-4 transition-shadow hover:shadow-md">
       {/* Title and help text */}
-  <h2 className="font-semibold text-lg">Upload file</h2>
+  <h2 className="font-semibold text-lg flex items-center gap-2">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5 text-brand-600"><path d="M4 4a2 2 0 012-2h7.586A2 2 0 0115 2.586L19.414 7A2 2 0 0120 8.414V20a2 2 0 01-2 2H6a2 2 0 01-2-2V4z"/><path d="M14 2.586V6a2 2 0 002 2h3.414"/></svg>
+        Upload file
+      </h2>
   <p className="text-slate-600">PDF, Word, or image. Drop a file here or browse to select.</p>
 
       {/* Drag-and-drop area with click-to-browse fallback */}
@@ -168,7 +171,10 @@ export default function UploadCard({ onResult, onClear }) {
 
       {/* Submit and clear actions */}
       <div className="grid grid-cols-2 gap-3 items-center">
-        <button className="btn w-full whitespace-nowrap" onClick={onSubmit} disabled={!file || loading}>
+        <button className="btn w-full whitespace-nowrap disabled:opacity-60 relative" onClick={onSubmit} disabled={!file || loading}>
+          {loading && (
+            <span className="absolute left-3 inline-block h-4 w-4 animate-spin rounded-full border-2 border-slate-300 border-t-transparent" aria-hidden />
+          )}
           {loading ? 'Uploading…' : 'Submit'}
         </button>
         <button className="btn bg-slate-500 hover:bg-slate-600 w-full whitespace-nowrap" type="button" onClick={clear}>Clear</button>

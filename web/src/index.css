@@ -11,6 +11,25 @@
 /* Page background and default text color */
 body {
   @apply bg-sand text-slate-800;
+  /* Subtle gradient + dot grid to add depth without hurting readability */
+  --bg-spot-1: rgba(16, 185, 129, 0.12); /* emerald-ish brand tint */
+  --bg-spot-2: rgba(59, 130, 246, 0.08); /* blue tint complement */
+  --bg-dot: rgba(2, 6, 23, 0.04); /* slate-950 at low alpha */
+  background-image:
+    url('/bg-pattern.svg'),
+    radial-gradient(800px 400px at 90% -100px, var(--bg-spot-2), rgba(255,255,255,0) 70%),
+    radial-gradient(600px 300px at 50% -80px, var(--bg-spot-1), rgba(255,255,255,0) 70%),
+    radial-gradient(circle at 1px 1px, var(--bg-dot) 1px, transparent 1px);
+  background-size:
+    1600px 1600px,
+    auto,
+    auto,
+    24px 24px;
+  background-position:
+    top center,
+    top right,
+    top center,
+    0 0;
 }
 
 /* Reusable card style */
@@ -31,6 +50,24 @@ body {
 /* Dark mode and high contrast support via data attributes on <html> */
 html[data-theme="dark"] body {
   @apply bg-slate-900 text-slate-100;
+  --bg-spot-1: rgba(16, 185, 129, 0.12);
+  --bg-spot-2: rgba(59, 130, 246, 0.12);
+  --bg-dot: rgba(255, 255, 255, 0.05);
+  background-image:
+    url('/bg-pattern.svg'),
+    radial-gradient(800px 400px at 90% -100px, var(--bg-spot-2), rgba(0,0,0,0) 70%),
+    radial-gradient(600px 300px at 50% -80px, var(--bg-spot-1), rgba(0,0,0,0) 70%),
+    radial-gradient(circle at 1px 1px, var(--bg-dot) 1px, transparent 1px);
+  background-size:
+    1600px 1600px,
+    auto,
+    auto,
+    24px 24px;
+  background-position:
+    top center,
+    top right,
+    top center,
+    0 0;
 }
 html[data-theme="dark"] .card {
   @apply bg-slate-800 border-slate-700;
@@ -44,6 +81,8 @@ html[data-theme="dark"] .input {
 
 html[data-contrast="high"] body {
   @apply bg-white text-black;
+  /* Keep high-contrast mode plain for maximum legibility */
+  background-image: none !important;
 }
 html[data-contrast="high"] .card {
   @apply bg-white border-black;

@@ -150,9 +150,12 @@ export default function CameraCard({ onResult, onClear }) {
   }
 
   return (
-    <div className="card p-5 flex flex-col gap-4">
+    <div className="card p-5 flex flex-col gap-4 transition-shadow hover:shadow-md">
       {/* Title and help text */}
-  <h2 className="font-semibold text-lg">Take picture</h2>
+  <h2 className="font-semibold text-lg flex items-center gap-2">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5 text-brand-600"><path d="M9 3l-1.5 2H5a2 2 0 00-2 2v10a2 2 0 002 2h14a2 2 0 002-2V7a2 2 0 00-2-2h-2.5L15 3H9zm3 14a4 4 0 110-8 4 4 0 010 8z"/></svg>
+        Take picture
+      </h2>
       <p className="text-slate-600">Use your camera to snap the homework. If camera access is blocked, please use the Upload file option.</p>
 
       {/* Live camera toggle */}
@@ -192,7 +195,10 @@ export default function CameraCard({ onResult, onClear }) {
 
       {/* Submission and reset controls */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 items-center">
-        <button className="btn text-lg py-3 w-full whitespace-nowrap" onClick={onSubmit} disabled={!file || loading}>
+        <button className="btn text-lg py-3 w-full whitespace-nowrap disabled:opacity-60 relative" onClick={onSubmit} disabled={!file || loading}>
+          {loading && (
+            <span className="absolute left-3 inline-block h-4 w-4 animate-spin rounded-full border-2 border-slate-300 border-t-transparent" aria-hidden />
+          )}
           {loading ? 'Sending…' : 'Submit'}
         </button>
         <button className="btn bg-slate-500 hover:bg-slate-600 w-full whitespace-nowrap" type="button" onClick={clear}>Clear</button>

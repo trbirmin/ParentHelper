@@ -6,8 +6,9 @@ import { initReactI18next } from 'react-i18next'
 const resources = {
   en: {
     translation: {
-      title: 'Help your child with homework, confidently',
-      subtitle: 'Upload a worksheet, snap a picture, or type a question. We\'ll guide you with clear, parent-friendly explanations.',
+  title: 'Homework made easy for parents.',
+  subtitle: 'Upload a worksheet, snap a photo, or ask a question. Get simple, step‑by‑step guidance you can explain with confidence.',
+  slogan: 'Guidance you get, support they need.',
       upload: 'Upload file',
       camera: 'Take picture',
       question: 'Type or speak a question',
@@ -20,8 +21,9 @@ const resources = {
   },
   es: {
     translation: {
-      title: 'Ayuda a tu hijo con la tarea, con confianza',
-      subtitle: 'Sube una hoja de trabajo, toma una foto o escribe una pregunta. Te guiaremos con explicaciones claras y sencillas.',
+  title: 'Haz que la tarea sea sin estrés — para ti y tu hijo',
+  subtitle: 'Sube una hoja, toma una foto o haz una pregunta. Recibe explicaciones claras, paso a paso y fáciles para padres.',
+  slogan: 'Orientación para ti, apoyo para ellos.',
       upload: 'Subir archivo',
       camera: 'Tomar foto',
       question: 'Escribe o di una pregunta',

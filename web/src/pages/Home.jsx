@@ -20,8 +20,8 @@ export default function Home() {
 
   return (
     <div className="space-y-8">
-      <section className="text-center py-6">
-        <h1 className="text-3xl md:text-4xl font-bold mb-2">{t('title')}</h1>
+      <section className="text-center py-10 rounded-3xl bg-gradient-to-b from-brand-50/70 to-transparent border border-transparent">
+        <h1 className="text-3xl md:text-4xl font-bold mb-3">{t('title')}</h1>
         <p className="text-slate-600 max-w-3xl mx-auto">{t('subtitle')}</p>
       </section>
 
@@ -170,13 +170,13 @@ function ResultModal({ result, onClose, asText }) {
   const stopSpeak = () => { if (window.speechSynthesis){ window.speechSynthesis.cancel(); setSpeaking(false) } }
   return createPortal(
     <div
-      className="fixed inset-0 z-[9999] bg-black/50 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-6"
+      className="fixed inset-0 z-[9999] bg-black/50 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-6 pb-[max(env(safe-area-inset-bottom),0px)]"
       onClick={onClose}
       role="dialog"
       aria-modal="true"
     >
       <div
-        className="w-full sm:max-w-3xl bg-white rounded-t-2xl sm:rounded-2xl shadow-xl"
+        className="w-full sm:max-w-3xl bg-white rounded-t-3xl sm:rounded-3xl shadow-2xl"
         onClick={stop}
       >
   {/* Modal header with controls */}
