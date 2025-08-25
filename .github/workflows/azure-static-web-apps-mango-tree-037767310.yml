@@ -32,11 +32,11 @@ jobs:
             api/package-lock.json
       - name: Install and build web
         run: |
-          npm --prefix web ci
+          npm --prefix web install --no-audit --no-fund
           npm --prefix web run build
       - name: Install API deps (production)
         run: |
-          npm --prefix api ci
+          npm --prefix api install --omit=dev --no-audit --no-fund
       - name: Install OIDC Client from Core Package
         run: npm install @actions/core@1.6.0 @actions/http-client
       - name: Get Id Token
