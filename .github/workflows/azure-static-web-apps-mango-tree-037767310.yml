@@ -22,6 +22,18 @@ jobs:
         with:
           submodules: true
           lfs: false
+      - name: Setup Node.js 20 with npm cache
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+      - name: Install and build web
+        run: |
+          npm --prefix web ci
+          npm --prefix web run build
+      - name: Install API deps (production)
+        run: |
+          npm --prefix api ci
       - name: Install OIDC Client from Core Package
         run: npm install @actions/core@1.6.0 @actions/http-client
       - name: Get Id Token
@@ -40,10 +52,12 @@ jobs:
           action: "upload"
           ###### Repository/Build Configurations - These values can be configured to match your app requirements. ######
           # For more information regarding Static Web App workflow configurations, please visit: https://aka.ms/swaworkflowconfig
-          app_location: "web" # App source code path
-          api_location: "api" # Api source code path - optional
-          output_location: "dist" # Built app content directory - optional
-          build_timeout_in_minutes: 30
+          # Prebuilt upload: app_location points to built output when skip_app_build is true
+          app_location: "web/dist"
+          api_location: "api"
+          skip_app_build: true
+          skip_api_build: true
+          config_file_location: "web"
           github_id_token: ${{ steps.idtoken.outputs.result }}
           ###### End of Repository/Build Configurations ######
 
