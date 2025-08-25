@@ -9,6 +9,7 @@ import App from './App'
 import Home from './pages/Home'
 import About from './pages/About'
 import Contact from './pages/Contact'
+import Subjects from './pages/Subjects'
 import 'katex/dist/katex.min.css'
 import './i18n'
 
@@ -19,6 +20,7 @@ createRoot(document.getElementById('root')).render(
       <App>
         <Routes>
           <Route path="/" element={<Home />} />
+          <Route path="/subjects" element={<Subjects />} />
           <Route path="/about" element={<About />} />
           <Route path="/contact" element={<Contact />} />
         </Routes>

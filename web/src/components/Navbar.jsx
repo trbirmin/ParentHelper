@@ -27,6 +27,7 @@ export default function Navbar() {
         {/* Desktop nav */}
         <nav className="hidden md:flex items-center gap-2">
           <NavLink to="/" className={linkCls} end>Home</NavLink>
+          <NavLink to="/subjects" className={linkCls}>Subjects</NavLink>
           <NavLink to="/about" className={linkCls}>About</NavLink>
           <NavLink to="/contact" className={linkCls}>Contact</NavLink>
           <select onChange={changeLang} defaultValue={i18n.language} className="input w-auto text-sm py-1" aria-label="Language">
@@ -65,6 +66,7 @@ export default function Navbar() {
           <div className="max-w-7xl mx-auto px-4 py-3 grid gap-3">
             <div className="flex gap-2">
               <NavLink to="/" className={linkCls} end onClick={()=>setOpen(false)}>Home</NavLink>
+              <NavLink to="/subjects" className={linkCls} onClick={()=>setOpen(false)}>Subjects</NavLink>
               <NavLink to="/about" className={linkCls} onClick={()=>setOpen(false)}>About</NavLink>
               <NavLink to="/contact" className={linkCls} onClick={()=>setOpen(false)}>Contact</NavLink>
             </div>
